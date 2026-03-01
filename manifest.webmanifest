@@ -1,0 +1,11 @@
+{
+  "name": "SIP Caption Helper",
+  "short_name": "Caption",
+  "description": "Persistent caption builder with people directory and categories.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0c10",
+  "theme_color": "#0b0c10",
+  "lang": "fr",
+  "icons": []
+}

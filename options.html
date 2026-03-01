@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SIP Caption Helper — Options</title>
+  <style>
+    body { font: 14px/1.45 system-ui, sans-serif; padding: 18px; max-width: 1100px; margin: 0 auto; }
+    h1 { margin: 0 0 6px; }
+    .muted { color: #666; margin-bottom: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font: inherit; }
+    textarea { min-height: 78px; resize: vertical; }
+    button { padding: 10px 12px; border-radius: 10px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: 750; }
+    button:hover { background: #f6f6f6; }
+    button.primary { background: #3b82f6; color: white; border-color: #2563eb; }
+    button.primary:hover { filter: brightness(1.03); }
+    button.danger { border-color: #f0c2c2; background: #fff5f5; }
+    button.danger:hover { background: #ffecec; }
+
+    .rowActions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 12px 0 6px; }
+    .small { font-size: 12px; color: #666; }
+    .ok { color: #0a7a2f; font-weight: 800; }
+    .warn { color: #7a4a0a; font-weight: 800; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border-bottom: 1px solid #eee; text-align: left; padding: 10px; vertical-align: top; }
+    th { font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 0.02em; }
+    .actions { display: flex; gap: 8px; white-space: nowrap; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; color: #444; }
+    .back { display: inline-block; margin-bottom: 14px; color: #3b82f6; text-decoration: none; font-weight: 700; }
+    .back:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <a href="index.html" class="back">← Back to Caption Builder</a>
+  <h1>SIP Caption Helper — Options</h1>
+  <div class="muted">
+    Maintain your people database here. Use <b>Export</b> to share with colleagues and <b>Import</b> to load their updates.
+    Category is searchable in the builder (e.g., Luxembourg, Philippines).
+  </div>
+
+  <div class="grid">
+    <div>
+      <input id="short" placeholder="Short name (e.g., Xavier Bettel)" />
+      <input id="category" placeholder="Category (e.g., Luxembourg / Philippines)" />
+    </div>
+
+    <div>
+      <textarea id="full" placeholder="Full title string (e.g., Vice-Premier Ministre, …, Xavier Bettel)"></textarea>
+      <button id="add" class="primary">Add</button>
+    </div>
+  </div>
+
+  <div class="rowActions">
+    <button id="exportBtn">Export database (JSON)</button>
+    <button id="importBtn">Import database (JSON)</button>
+    <input id="importFile" type="file" accept="application/json" hidden />
+    <button id="resetBtn" class="danger" title="Clear all entries">Clear all</button>
+    <span id="status" class="small"></span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 18%;">Short</th>
+        <th style="width: 14%;">Category</th>
+        <th>Full</th>
+        <th style="width: 18%;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <script src="options.js"></script>
+</body>
+</html>
