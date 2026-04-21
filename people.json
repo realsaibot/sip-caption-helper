@@ -1,0 +1,275 @@
+[
+  {
+    "id": "mihai-popoi",
+    "short": "Mihai Popșoi",
+    "full": "Vice-Premier Ministre et Ministre des Affaires étrangères de la République de Moldova, Mihai Popșoi",
+    "category": "Moldova",
+    "photo": ""
+  },
+  {
+    "id": "luc-decker",
+    "short": "Luc Decker",
+    "full": "Consul général, Directeur exécutif, Luc Decker",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "nicole-bintner",
+    "short": "Nicole Bintner",
+    "full": "Ambassatrice du Luxembourg à Washington, Nicole Bintner",
+    "category": "Lux, Washington",
+    "photo": ""
+  },
+  {
+    "id": "gilles-roth",
+    "short": "Gilles Roth",
+    "full": "Ministre des Finances, Gilles Roth",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "leonard-levie",
+    "short": "Leonard Levie",
+    "full": "Officier de l’Ordre du Mérite, Leonard Levie",
+    "category": "New York",
+    "photo": ""
+  },
+  {
+    "id": "m-fernand-lamesch",
+    "short": "Fernand Lamesch",
+    "full": "Commandeur de l’Ordre de Mérite civil et militaire\nd’Adolphe de Nassau, Fernand Lamesch",
+    "category": "New York",
+    "photo": ""
+  },
+  {
+    "id": "grand-duc",
+    "short": "Grand-Duc",
+    "full": "S.A.R. le Grand-Duc",
+    "category": "luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "lutz-kunack",
+    "short": "Lutz Kunack",
+    "full": "Consul honoraire avec juridiction sur le territoire des Philippines",
+    "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "lazaro",
+    "short": "M. Theresa \"Tess\" P. Lazaro",
+    "full": "Secrétaire aux Affaires étrangères, M. Theresa \"Tess\" P. Lazaro",
+    "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "cacdac",
+    "short": "Hans Leo J. Cacdac",
+    "full": "Secrétaire du Département des Travailleurs migrants des Philippines, Hans Leo J. Cacdac",
+    "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "bettel",
+    "short": "Xavier Bettel",
+    "full": "Vice-Premier Ministre, Ministre des Affaires étrangères et du Commerce extérieur, Ministre de la Coopération et de l'Action humanitaire, Xavier Bettel",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "leesch",
+    "short": "Michel Leesch",
+    "full": "Ambassadeur du Luxembourg aux Philippines, Michel Leesch",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "ferring",
+    "short": "Pierre Ferring",
+    "full": "Directeur général de la Promotion du commerce extérieur et des investissements, Pierre Ferring",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "schreiner",
+    "short": "Sam Schreiner",
+    "full": "Directeur d’Asie, Sam Schreiner",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "dockendorf",
+    "short": "Véronique Dockendorf",
+    "full": "Directrice des Affaires politiques, Véronique Dockendorf",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "moes",
+    "short": "Anne Moes",
+    "full": "Cheffe de mission adjointe, Anne Moes",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "poveromo",
+    "short": "Luc Poveromo",
+    "full": "Secrétaire de Légation, Attaché de presse du Vice-Premier Ministre, Luc Poveromo",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "siebenaler",
+    "short": "Anne Siebenaler",
+    "full": "Attachée de Légation, Desk D8, Anne Siebenaler",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "gutenkauf",
+    "short": "Max Gutenkauf",
+    "full": "Chargé de la communication digitale du Vice-Premier Ministre, Max Gutenkauf",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "chatterton",
+    "short": "Isabel Chatterton",
+    "full": "Director General, Private Sector Operations Department (PSOD), Isabel Chatterton",
+    "category": "ADB",
+    "photo": ""
+  },
+  {
+    "id": "yuhaku",
+    "short": "Kenji Yuhaku",
+    "full": "Senior Advisor, Private Sector Operations Department (PSOD), Kenji Yuhaku",
+    "category": "ADB",
+    "photo": ""
+  },
+  {
+    "id": "astrup",
+    "short": "Claus Astrup",
+    "full": "Director, Strategic Partnerships Division, Claus Astrup",
+    "category": "ADB",
+    "photo": ""
+  },
+  {
+    "id": "flegler",
+    "short": "Paul Flegler",
+    "full": "Director, Finance Sector Group, Paul Flegler",
+    "category": "ADB",
+    "photo": ""
+  },
+  {
+    "id": "cipriano",
+    "short": "Lisette Cipriano",
+    "full": "Principal Digital Finance Specialist, Finance Sector Group, Lisette Cipriano",
+    "category": "ADB",
+    "photo": ""
+  },
+  {
+    "id": "hersson",
+    "short": "Daniel Hersson",
+    "full": "Senior Investment Specialist (ADB Ventures Team Lead), Private Sector Operations Department (PSOD), Daniel Hersson",
+    "category": "ADB",
+    "photo": ""
+  },
+  {
+    "id": "sittakaradej",
+    "short": "Pang Thitirat Sittakaradej",
+    "full": "Investment Specialist (ADB Ventures Seed Program Lead), Private Sector Operations Department (PSOD), Pang Thitirat Sittakaradej",
+    "category": "ADB",
+    "photo": ""
+  },
+  {
+    "id": "ayque",
+    "short": "Felix Ayque",
+    "full": "CEO & Founder, Komunidad, Felix Ayque",
+    "category": "Komunidad",
+    "photo": ""
+  },
+  {
+    "id": "raouna",
+    "short": "Marilena Raouna",
+    "full": "Deputy Minister for European Affairs, Marilena Raouna",
+    "category": "Cyprus",
+    "photo": ""
+  },
+  {
+    "id": "sefcovic",
+    "short": "Maroš Šefčovič",
+    "full": "European Commissioner for Trade and Economic Security and for Interinstitutional Relations and Transparency, Maroš Šefčovič",
+    "category": "European Commission",
+    "photo": ""
+  },
+  {
+    "id": "estok",
+    "short": "Marek Estok",
+    "full": "State Secretary of the Ministry of Foreign and European Affairs of the Slovak Republic, Marek Estok",
+    "category": "Slovakia",
+    "photo": ""
+  },
+  {
+    "id": "foti",
+    "short": "Tommaso Foti",
+    "full": "Minister for European Affairs, the South, Cohesion Policy, and the National Recovery and Resilience Plan (NRRP), Tommaso Foti",
+    "category": "Italy",
+    "photo": ""
+  },
+  {
+    "id": "sybiha",
+    "short": "Andrii Sybiha",
+    "full": "Ministre des Affaires étrangères de l'Ukraine, Andrii Sybiha",
+    "category": "Ukraine",
+    "photo": ""
+  },
+  {
+    "id": "konjufca",
+    "short": "Glauk Konjufca",
+    "full": "Premier Vice-Premier Ministre et Ministre des Affaires étrangères et de la Diaspora du Kosovo, Glauk Konjufca",
+    "category": "Kosovo",
+    "photo": ""
+  },
+  {
+    "id": "safadi",
+    "short": "Ayman Safadi",
+    "full": "Vice-Premier Ministre et Ministre des Affaires étrangères et des Expatriés du Royaume hachémite de Jordanie, Ayman Safadi",
+    "category": "Jordan",
+    "photo": ""
+  },
+  {
+    "id": "tileuberdi",
+    "short": "Mukhtar Tileuberdi",
+    "full": "Ambassadeur du Kazakhstan en Autriche et Représentant permanent auprès des organisations internationales à Vienne, Mukhtar Tileuberdi",
+    "category": "Kazakhstan",
+    "photo": ""
+  },
+  {
+    "id": "abdelatty",
+    "short": "Badr Abdelatty",
+    "full": "Ministre des Affaires étrangères, de l'Émigration et des Expatriés égyptiens de la République arabe d'Égypte, Badr Abdelatty",
+    "category": "Egypt",
+    "photo": ""
+  },
+  {
+    "id": "skau",
+    "short": "Carl Skau",
+    "full": "Directeur exécutif adjoint et Chef des opérations du Programme alimentaire mondial, Carl Skau",
+    "category": "PAM",
+    "photo": ""
+  },
+  {
+    "id": "di-maio",
+    "short": "Luigi Di Maio",
+    "full": "Représentant spécial de l'Union européenne pour la région du Golfe, Luigi Di Maio",
+    "category": "EU",
+    "photo": ""
+  },
+  {
+    "id": "gunnarsdottir",
+    "short": "Þorgerður Katrín Gunnarsdóttir",
+    "full": "Ministre des Affaires étrangères et de la Défense d'Islande, Þorgerður Katrín Gunnarsdóttir",
+    "category": "Iceland",
+    "photo": ""
+  }
+]
