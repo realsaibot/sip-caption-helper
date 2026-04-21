@@ -16,30 +16,67 @@ const storage = {
 };
 
 const els = {
-  short:        document.getElementById("short"),
-  category:     document.getElementById("category"),
-  full:         document.getElementById("full"),
-  add:          document.getElementById("add"),
-  exportBtn:    document.getElementById("exportBtn"),
-  importBtn:    document.getElementById("importBtn"),
-  importFile:   document.getElementById("importFile"),
-  resetBtn:     document.getElementById("resetBtn"),
-  status:       document.getElementById("status"),
-  tbody:        document.getElementById("tbody"),
+  short:            document.getElementById("short"),
+  category:         document.getElementById("category"),
+  full:             document.getElementById("full"),
+  add:              document.getElementById("add"),
+  exportBtn:        document.getElementById("exportBtn"),
+  importBtn:        document.getElementById("importBtn"),
+  importFile:       document.getElementById("importFile"),
+  resetBtn:         document.getElementById("resetBtn"),
+  status:           document.getElementById("status"),
+  tbody:            document.getElementById("tbody"),
   addPhotoInput:    document.getElementById("addPhotoInput"),
   addAvatarCircle:  document.getElementById("addAvatarCircle"),
   addInitials:      document.getElementById("addInitials"),
   addRemovePhoto:   document.getElementById("addRemovePhoto"),
+  tableSearch:      document.getElementById("tableSearch"),
+  clearTableSearch: document.getElementById("clearTableSearch"),
+  tableCount:       document.getElementById("tableCount"),
+  // GitHub UI
+  ghToken:          document.getElementById("ghToken"),
+  ghOwner:          document.getElementById("ghOwner"),
+  ghRepo:           document.getElementById("ghRepo"),
+  ghBranch:         document.getElementById("ghBranch"),
+  ghSaveConfig:     document.getElementById("ghSaveConfig"),
+  ghTest:           document.getElementById("ghTest"),
+  ghDisconnect:     document.getElementById("ghDisconnect"),
+  ghTestStatus:     document.getElementById("ghTestStatus"),
+  ghStatusBadge:    document.getElementById("ghStatusBadge"),
+  syncDot:          document.getElementById("syncDot"),
+  syncLabel:        document.getElementById("syncLabel"),
 };
 
 let people = [];
-let pendingPhoto = ""; // base64 staged for the add form
+let pendingPhoto = "";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Sync UI helpers ───────────────────────────────────────────────────────────
+
+function setSyncState(state, msg = "") {
+  // state: 'idle' | 'syncing' | 'ok' | 'error'
+  els.syncDot.className = "syncDot " + (state === 'idle' ? '' : state);
+  els.syncLabel.textContent = msg;
+}
+
+function updateGhBadge() {
+  const configured = GithubSync.isConfigured();
+  els.ghStatusBadge.textContent    = configured ? "Connected" : "Not configured";
+  els.ghStatusBadge.className      = "ghStatus " + (configured ? "connected" : "disconnected");
+}
+
+function populateGhFields() {
+  const c = GithubSync.getConfig();
+  if (c.token)  els.ghToken.value  = c.token;
+  if (c.owner)  els.ghOwner.value  = c.owner;
+  if (c.repo)   els.ghRepo.value   = c.repo;
+  if (c.branch) els.ghBranch.value = c.branch;
+}
+
+// ── Core helpers ──────────────────────────────────────────────────────────────
 
 function setStatus(msg, kind = "info") {
   els.status.textContent = msg;
-  els.status.className = "small" + (kind === "ok" ? " ok" : kind === "warn" ? " warn" : "");
+  els.status.className   = "small" + (kind === "ok" ? " ok" : kind === "warn" ? " warn" : "");
   setTimeout(() => (els.status.textContent = ""), 2500);
 }
 
@@ -64,18 +101,15 @@ function getInitials(short) {
     : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-// Build an avatar <div> with optional image inside
 function makeAvatarEl(photo, short, sizePx = 40, cssClass = "tAvatar") {
   const wrap = document.createElement("div");
   wrap.className = cssClass;
   wrap.style.width  = sizePx + "px";
   wrap.style.height = sizePx + "px";
   wrap.style.fontSize = Math.round(sizePx * 0.34) + "px";
-
   if (photo) {
     const img = document.createElement("img");
-    img.src = photo;
-    img.alt = short;
+    img.src = photo; img.alt = short;
     wrap.appendChild(img);
   } else {
     wrap.textContent = getInitials(short);
@@ -83,7 +117,6 @@ function makeAvatarEl(photo, short, sizePx = 40, cssClass = "tAvatar") {
   return wrap;
 }
 
-// Update the add-form avatar preview
 function refreshAddAvatar() {
   els.addAvatarCircle.innerHTML = "";
   if (pendingPhoto) {
@@ -93,7 +126,6 @@ function refreshAddAvatar() {
     els.addRemovePhoto.style.display = "inline-block";
   } else {
     const span = document.createElement("span");
-    span.id = "addInitials";
     span.textContent = els.short.value.trim() ? getInitials(els.short.value) : "?";
     els.addAvatarCircle.appendChild(span);
     els.addRemovePhoto.style.display = "none";
@@ -105,29 +137,67 @@ function normalizePerson(x) {
   const full     = String(x.full     || "").trim();
   const category = String(x.category || "").trim();
   const id       = String(x.id       || "").trim() || slugify(short);
-  // Note: no photo field here — photos live in IndexedDB
   return { id, short, full, category };
-}
-
-function validatePeopleArray(arr) {
-  if (!Array.isArray(arr)) throw new Error("JSON must be an array.");
-  const cleaned = arr.map(normalizePerson).filter(p => p.short && p.full);
-  if (!cleaned.length) throw new Error("No valid entries (need short + full).");
-  return cleaned;
 }
 
 // ── Load / Save ───────────────────────────────────────────────────────────────
 
 async function load() {
+  // 1. Load from localStorage first so UI is instant
   const res = await storage.get(["people"]);
   people = Array.isArray(res.people)
     ? res.people.map(normalizePerson).filter(p => p.short && p.full)
     : [];
+
+  // 2. If GitHub is configured, fetch fresh data from there
+  if (GithubSync.isConfigured()) {
+    setSyncState("syncing", "Fetching from GitHub…");
+    try {
+      const remote = await GithubSync.load();
+      if (remote !== null) {
+        // Extract photos from remote data → store in IndexedDB
+        const photoMap = {};
+        const cleanedRemote = remote.map(x => {
+          if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
+          return normalizePerson(x);
+        }).filter(p => p.short && p.full);
+
+        if (Object.keys(photoMap).length) await PhotoDB.setMany(photoMap);
+
+        people = cleanedRemote;
+        await storage.set({ people });
+      }
+      setSyncState("ok", "Synced with GitHub");
+    } catch (e) {
+      setSyncState("error", "GitHub unreachable — using local data");
+      console.warn("GitHub load failed:", e);
+    }
+  } else {
+    setSyncState("idle", "");
+  }
+
   await render();
 }
 
-async function save() {
+async function saveLocal() {
   await storage.set({ people });
+}
+
+// Save to localStorage + GitHub (fire-and-forget for GitHub, non-blocking)
+async function saveAll() {
+  await saveLocal();
+
+  if (!GithubSync.isConfigured()) return;
+
+  setSyncState("syncing", "Saving…");
+  try {
+    const allPhotos = await PhotoDB.getAll();
+    await GithubSync.save(people, allPhotos);
+    setSyncState("ok", "Saved to GitHub ✓");
+  } catch (e) {
+    setSyncState("error", "GitHub save failed — saved locally");
+    console.warn("GitHub save failed:", e);
+  }
 }
 
 // ── Render table ──────────────────────────────────────────────────────────────
@@ -135,43 +205,48 @@ async function save() {
 async function render() {
   els.tbody.innerHTML = "";
 
-  // Load all photos in one shot
-  const ids    = people.map(p => p.id);
+  const q = (els.tableSearch?.value || "").toLowerCase().trim();
+  const filtered = q
+    ? people.filter(p => `${p.short} ${p.full} ${p.category} ${p.id}`.toLowerCase().includes(q))
+    : people;
+
+  if (els.tableCount) {
+    els.tableCount.textContent = q
+      ? `${filtered.length} of ${people.length}`
+      : `${people.length} total`;
+  }
+
+  const ids    = filtered.map(p => p.id);
   const photos = ids.length ? await PhotoDB.getMany(ids) : {};
 
-  people.forEach((p, i) => {
+  filtered.forEach((p) => {
+    const trueIndex = people.indexOf(p);
     const tr = document.createElement("tr");
 
-    // Photo cell
     const tdPhoto = document.createElement("td");
     tdPhoto.appendChild(makeAvatarEl(photos[p.id] || null, p.short, 40));
     tr.appendChild(tdPhoto);
 
-    // Data cells
     tr.insertAdjacentHTML("beforeend", `
-      <td>
-        <strong>${escapeHtml(p.short)}</strong>
-        <div class="mono">${escapeHtml(p.id)}</div>
-      </td>
+      <td><strong>${escapeHtml(p.short)}</strong><div class="mono">${escapeHtml(p.id)}</div></td>
       <td>${escapeHtml(p.category || "")}</td>
       <td>${escapeHtml(p.full)}</td>
-      <td>
-        <div class="actions">
-          <button data-action="edit">Edit</button>
-          <button data-action="delete">Delete</button>
-        </div>
-      </td>
+      <td><div class="actions">
+        <button data-action="edit">Edit</button>
+        <button data-action="delete">Delete</button>
+      </div></td>
     `);
 
     tr.querySelector('[data-action="delete"]').onclick = async () => {
       await PhotoDB.remove(p.id);
-      people.splice(i, 1);
-      await save();
+      people.splice(trueIndex, 1);
+      await saveAll();
       await render();
       setStatus("Deleted ✅", "ok");
     };
 
-    tr.querySelector('[data-action="edit"]').onclick = () => renderEditRow(i, photos[p.id] || null);
+    tr.querySelector('[data-action="edit"]').onclick = () =>
+      renderEditRow(trueIndex, photos[p.id] || null);
 
     els.tbody.appendChild(tr);
   });
@@ -181,16 +256,21 @@ async function render() {
 
 function renderEditRow(i, currentPhoto) {
   const p  = people[i];
-  const tr = els.tbody.children[i];
-  let editPhoto = currentPhoto; // may change during edit session
+  const tr = els.tbody.children[
+    // find the rendered row for this person
+    Array.from(els.tbody.children).findIndex(row => {
+      const strong = row.querySelector("strong");
+      return strong && strong.textContent === p.short;
+    })
+  ];
+  if (!tr) return;
 
-  // Photo cell
+  let editPhoto = currentPhoto;
+
   const tdPhoto = tr.children[0];
   tdPhoto.innerHTML = "";
-
   const avatarWrap = document.createElement("div");
   avatarWrap.style.cssText = "display:flex;flex-direction:column;align-items:flex-start;gap:6px;";
-
   const avatarEl = makeAvatarEl(editPhoto, p.short, 48);
   avatarWrap.appendChild(avatarEl);
 
@@ -206,7 +286,6 @@ function renderEditRow(i, currentPhoto) {
   removeBtn.textContent = "✕ Remove";
   removeBtn.style.cssText = "font-size:11px;color:#c00;background:none;border:none;padding:0;cursor:pointer;font-weight:700;display:" + (editPhoto ? "block" : "none");
   avatarWrap.appendChild(removeBtn);
-
   tdPhoto.appendChild(avatarWrap);
 
   function refreshEditAvatar() {
@@ -222,8 +301,7 @@ function renderEditRow(i, currentPhoto) {
   }
 
   fileInput.addEventListener("change", async e => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
+    const file = e.target.files?.[0]; e.target.value = "";
     if (!file) return;
     try {
       editPhoto = await CropPicker.open(file);
@@ -231,56 +309,35 @@ function renderEditRow(i, currentPhoto) {
     } catch { setStatus("Could not load image.", "warn"); }
   });
 
-  removeBtn.onclick = () => {
-    editPhoto = null;
-    refreshEditAvatar();
-    removeBtn.style.display = "none";
-  };
+  removeBtn.onclick = () => { editPhoto = null; refreshEditAvatar(); removeBtn.style.display = "none"; };
 
-  // Remaining cells
-  tr.children[1].innerHTML = `
-    <input data-field="short" value="${attr(p.short)}" />
-    <div class="mono">${escapeHtml(p.id)}</div>
-  `;
+  tr.children[1].innerHTML = `<input data-field="short" value="${attr(p.short)}" /><div class="mono">${escapeHtml(p.id)}</div>`;
   tr.children[2].innerHTML = `<input data-field="category" value="${attr(p.category || "")}" />`;
   tr.children[3].innerHTML = `<textarea data-field="full">${escapeHtml(p.full)}</textarea>`;
-  tr.children[4].innerHTML = `
-    <div class="actions">
-      <button data-action="save" class="primary">Save</button>
-      <button data-action="cancel">Cancel</button>
-    </div>
-  `;
+  tr.children[4].innerHTML = `<div class="actions"><button data-action="save" class="primary">Save</button><button data-action="cancel">Cancel</button></div>`;
 
-  // Live initials update
-  tr.querySelector('[data-field="short"]').addEventListener("input", () => {
-    if (!editPhoto) refreshEditAvatar();
-  });
-
+  tr.querySelector('[data-field="short"]').addEventListener("input", () => { if (!editPhoto) refreshEditAvatar(); });
   tr.querySelector('[data-action="cancel"]').onclick = () => render();
-
   tr.querySelector('[data-action="save"]').onclick = async () => {
     const newShort    = tr.querySelector('[data-field="short"]').value.trim();
     const newCategory = tr.querySelector('[data-field="category"]').value.trim();
     const newFull     = tr.querySelector('[data-field="full"]').value.trim();
-
     if (!newShort || !newFull) { setStatus("Short and Full are required.", "warn"); return; }
 
-    // Persist photo change
     if (editPhoto) await PhotoDB.set(p.id, editPhoto);
     else           await PhotoDB.remove(p.id);
 
     people[i] = normalizePerson({ id: p.id, short: newShort, category: newCategory, full: newFull });
-    await save();
+    await saveAll();
     await render();
     setStatus("Saved ✅", "ok");
   };
 }
 
-// ── Add form photo picker ─────────────────────────────────────────────────────
+// ── Add form ──────────────────────────────────────────────────────────────────
 
 els.addPhotoInput.addEventListener("change", async e => {
-  const file = e.target.files?.[0];
-  e.target.value = "";
+  const file = e.target.files?.[0]; e.target.value = "";
   if (!file) return;
   try {
     const result = await CropPicker.open(file);
@@ -288,53 +345,32 @@ els.addPhotoInput.addEventListener("change", async e => {
   } catch { setStatus("Could not load image.", "warn"); }
 });
 
-els.addRemovePhoto.addEventListener("click", () => {
-  pendingPhoto = "";
-  refreshAddAvatar();
-});
-
-els.short.addEventListener("input", () => {
-  if (!pendingPhoto) refreshAddAvatar();
-});
-
-// ── Add ───────────────────────────────────────────────────────────────────────
+els.addRemovePhoto.addEventListener("click", () => { pendingPhoto = ""; refreshAddAvatar(); });
+els.short.addEventListener("input", () => { if (!pendingPhoto) refreshAddAvatar(); });
 
 els.add.onclick = async () => {
   const short    = els.short.value.trim();
   const category = els.category.value.trim();
   const full     = els.full.value.trim();
-
   if (!short || !full) { setStatus("Short and Full are required.", "warn"); return; }
 
   const person = normalizePerson({ short, category, full });
   if (pendingPhoto) await PhotoDB.set(person.id, pendingPhoto);
-
   people.unshift(person);
 
-  // Reset form
-  els.short.value = "";
-  els.category.value = "";
-  els.full.value = "";
-  pendingPhoto = "";
-  refreshAddAvatar();
+  els.short.value = ""; els.category.value = ""; els.full.value = "";
+  pendingPhoto = ""; refreshAddAvatar();
 
-  await save();
+  await saveAll();
   await render();
   setStatus("Added ✅", "ok");
 };
 
-// ── Export (photos embedded as base64 for cross-device transfer) ──────────────
+// ── Export / Import ───────────────────────────────────────────────────────────
 
 els.exportBtn.onclick = async () => {
-  // Fetch all photos from IndexedDB
-  const allPhotos = await PhotoDB.getAll();
-
-  // Embed photos into person objects just for the export
-  const exportData = people.map(p => ({
-    ...p,
-    photo: allPhotos[p.id] || ""
-  }));
-
+  const allPhotos  = await PhotoDB.getAll();
+  const exportData = people.map(p => ({ ...p, photo: allPhotos[p.id] || "" }));
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
@@ -344,42 +380,31 @@ els.exportBtn.onclick = async () => {
   setStatus("Exported ✅", "ok");
 };
 
-// ── Import (merge; photos extracted into IndexedDB) ───────────────────────────
-
 els.importBtn.onclick = () => els.importFile.click();
 
 els.importFile.onchange = async () => {
-  const file = els.importFile.files?.[0];
-  els.importFile.value = "";
+  const file = els.importFile.files?.[0]; els.importFile.value = "";
   if (!file) return;
-
   try {
     const parsed = JSON.parse(await file.text());
     if (!Array.isArray(parsed)) throw new Error("JSON must be an array.");
-
-    // Separate photos from person data
     const photoMap = {};
-    const cleaned  = parsed
-      .map(x => {
-        if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
-        return normalizePerson(x);
-      })
-      .filter(p => p.short && p.full);
-
+    const cleaned  = parsed.map(x => {
+      if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
+      return normalizePerson(x);
+    }).filter(p => p.short && p.full);
     if (!cleaned.length) throw new Error("No valid entries found.");
 
-    // Store photos in IndexedDB
     if (Object.keys(photoMap).length) await PhotoDB.setMany(photoMap);
 
-    // Merge people
     let added = 0, updated = 0;
     cleaned.forEach(entry => {
       const idx = people.findIndex(p => p.id === entry.id);
       if (idx >= 0) { people[idx] = entry; updated++; }
-      else          { people.push(entry);  added++;   }
+      else          { people.push(entry); added++; }
     });
 
-    await save();
+    await saveAll();
     await render();
     setStatus(`Import complete: ${added} added, ${updated} updated ✅`, "ok");
   } catch (e) {
@@ -391,14 +416,61 @@ els.importFile.onchange = async () => {
 
 els.resetBtn.onclick = async () => {
   if (!confirm("Clear all entries and photos? This cannot be undone.")) return;
-  // Remove all photos from IndexedDB
   for (const p of people) await PhotoDB.remove(p.id);
   people = [];
-  await save();
+  await saveAll();
   await render();
   setStatus("Database cleared ✅", "ok");
 };
 
+// ── Table search ──────────────────────────────────────────────────────────────
+
+els.tableSearch?.addEventListener("input", () => render());
+els.clearTableSearch?.addEventListener("click", () => {
+  els.tableSearch.value = ""; render(); els.tableSearch.focus();
+});
+
+// ── GitHub settings UI ────────────────────────────────────────────────────────
+
+els.ghSaveConfig.onclick = () => {
+  GithubSync.setConfig({
+    token:  els.ghToken.value,
+    owner:  els.ghOwner.value,
+    repo:   els.ghRepo.value,
+    branch: els.ghBranch.value || "main",
+  });
+  updateGhBadge();
+  els.ghTestStatus.textContent = "Settings saved.";
+  setTimeout(() => (els.ghTestStatus.textContent = ""), 2000);
+};
+
+els.ghTest.onclick = async () => {
+  els.ghTestStatus.textContent = "Testing…";
+  try {
+    const name = await GithubSync.testConnection();
+    els.ghTestStatus.className = "small ok";
+    els.ghTestStatus.textContent = `✅ Connected to ${name}`;
+    updateGhBadge();
+  } catch (e) {
+    els.ghTestStatus.className = "small warn";
+    els.ghTestStatus.textContent = `❌ ${e.message}`;
+  }
+  setTimeout(() => {
+    els.ghTestStatus.textContent = "";
+    els.ghTestStatus.className   = "small";
+  }, 4000);
+};
+
+els.ghDisconnect.onclick = () => {
+  if (!confirm("Disconnect GitHub? Your local data stays intact.")) return;
+  GithubSync.clearConfig();
+  populateGhFields();
+  updateGhBadge();
+  setSyncState("idle", "");
+};
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
+populateGhFields();
+updateGhBadge();
 load();

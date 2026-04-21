@@ -33,9 +33,9 @@ const els = {
 let people       = [];
 let selection    = [];
 let prefixEnabled = false;
-let photoCache   = {}; // { [personId]: base64 } — loaded once from IndexedDB
+let photoCache   = {};
 
-// ── Photo / avatar ────────────────────────────────────────────────────────────
+// ── Avatar helpers ────────────────────────────────────────────────────────────
 
 function getInitials(short) {
   const parts = String(short || "?").trim().split(/\s+/);
@@ -46,29 +46,15 @@ function getInitials(short) {
 
 function makeAvatar(p, size) {
   const photo = photoCache[p.id] || null;
-
   if (photo) {
     const img = document.createElement("img");
-    img.src = photo;
-    img.alt = p.short;
-    img.style.cssText = `
-      width:${size}px; height:${size}px; border-radius:50%;
-      object-fit:cover; flex-shrink:0;
-      border:2px solid rgba(255,255,255,0.15);
-    `;
+    img.src = photo; img.alt = p.short;
+    img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,0.15);`;
     return img;
   }
-
   const div = document.createElement("div");
   div.textContent = getInitials(p.short);
-  div.style.cssText = `
-    width:${size}px; height:${size}px; border-radius:50%; flex-shrink:0;
-    background:rgba(255,255,255,0.07);
-    border:2px solid rgba(255,255,255,0.12);
-    display:flex; align-items:center; justify-content:center;
-    font-weight:700; font-size:${Math.round(size * 0.34)}px;
-    color:rgba(255,255,255,0.45);
-  `;
+  div.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size*0.34)}px;color:rgba(255,255,255,0.45);`;
   return div;
 }
 
@@ -89,33 +75,61 @@ function showToast(msg) {
   setTimeout(() => els.toast.classList.add("hidden"), 1200);
 }
 
+function slugify(s) {
+  return String(s || "").toLowerCase().trim()
+    .replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "").slice(0, 40) || "person";
+}
+
+function normalizePerson(x) {
+  const short    = String(x.short    || "").trim();
+  const full     = String(x.full     || "").trim();
+  const category = String(x.category || "").trim();
+  const id       = String(x.id       || "").trim() || slugify(short);
+  return { id, short, full, category };
+}
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 async function loadData() {
   const res = await storage.get(["people", "prefixEnabled", "selectionDraft"]);
 
-  people       = Array.isArray(res.people) ? res.people : [];
+  people        = Array.isArray(res.people) ? res.people.map(normalizePerson).filter(p => p.short && p.full) : [];
   prefixEnabled = !!res.prefixEnabled;
-  selection    = Array.isArray(res.selectionDraft) ? res.selectionDraft : [];
+  selection     = Array.isArray(res.selectionDraft) ? res.selectionDraft.map(normalizePerson).filter(p => p.short && p.full) : [];
 
   els.prefixToggle.checked = prefixEnabled;
-
-  // Normalize schema (no photo field — handled by photoCache)
-  const norm = p => ({
-    id:       p.id       || "",
-    short:    p.short    || "",
-    full:     p.full     || "",
-    category: p.category || ""
-  });
-
-  people    = people.map(norm).filter(p => p.short && p.full);
-  selection = selection.map(norm).filter(p => p.short && p.full);
-
   await storage.set({ people, selectionDraft: selection });
 
-  // Load all photos from IndexedDB into memory cache
+  // Load photos from IndexedDB into cache
   if (people.length) {
     photoCache = await PhotoDB.getMany(people.map(p => p.id));
+  }
+
+  // If GitHub is configured, refresh data in background
+  // Render immediately with local data, then re-render if GitHub has updates
+  if (GithubSync.isConfigured()) {
+    GithubSync.load()
+      .then(async remote => {
+        if (!remote) return;
+
+        const photoMap = {};
+        const cleanedRemote = remote.map(x => {
+          if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
+          return normalizePerson(x);
+        }).filter(p => p.short && p.full);
+
+        // Store any incoming photos
+        if (Object.keys(photoMap).length) await PhotoDB.setMany(photoMap);
+
+        // Update people list and cache
+        people = cleanedRemote;
+        await storage.set({ people });
+        photoCache = await PhotoDB.getMany(people.map(p => p.id));
+
+        // Re-render with fresh data
+        renderPeople();
+      })
+      .catch(e => console.warn("GitHub fetch failed on builder load:", e));
   }
 }
 
@@ -142,13 +156,11 @@ function renderPeople() {
   for (const p of filtered) {
     const row = document.createElement("div");
     row.className = "person";
-    row.style.cssText = "display:flex; align-items:center; gap:10px;";
+    row.style.cssText = "display:flex;align-items:center;gap:10px;";
 
     const textWrap = document.createElement("div");
-    textWrap.style.cssText = "min-width:0; flex:1;";
-    const cat = p.category
-      ? `<span class="personCat">${escapeHtml(p.category)}</span>`
-      : "";
+    textWrap.style.cssText = "min-width:0;flex:1;";
+    const cat = p.category ? `<span class="personCat">${escapeHtml(p.category)}</span>` : "";
     textWrap.innerHTML = `
       <div class="personName">${escapeHtml(p.short)}${cat}</div>
       <div class="personFull">${escapeHtml(p.full)}</div>
@@ -167,7 +179,7 @@ function renderPeople() {
   }
 }
 
-// ── Render selection panel ────────────────────────────────────────────────────
+// ── Render selection ──────────────────────────────────────────────────────────
 
 function renderSelection() {
   els.selCount.textContent = `${selection.length}`;
@@ -178,13 +190,13 @@ function renderSelection() {
 
     const item = document.createElement("div");
     item.className = "selItem";
-    item.style.cssText = "display:flex; align-items:center; gap:10px;";
+    item.style.cssText = "display:flex;align-items:center;gap:10px;";
 
     const left = document.createElement("div");
     left.className = "selTextWrap";
-    left.style.cssText = "min-width:0; flex:1;";
+    left.style.cssText = "min-width:0;flex:1;";
     left.innerHTML = `
-      <div class="selMeta">#${i + 1} · ${escapeHtml(p.short)}${p.category ? " · " + escapeHtml(p.category) : ""}</div>
+      <div class="selMeta">#${i+1} · ${escapeHtml(p.short)}${p.category ? " · " + escapeHtml(p.category) : ""}</div>
       <div class="selText">${escapeHtml(p.full)}</div>
     `;
 
@@ -192,20 +204,18 @@ function renderSelection() {
     btns.className = "selBtns";
 
     const up = document.createElement("button");
-    up.className = "iconBtn"; up.textContent = "↑"; up.title = "Move up";
-    up.disabled = i === 0;
+    up.className = "iconBtn"; up.textContent = "↑"; up.title = "Move up"; up.disabled = i === 0;
     up.addEventListener("click", () => {
       if (i === 0) return;
-      [selection[i - 1], selection[i]] = [selection[i], selection[i - 1]];
+      [selection[i-1], selection[i]] = [selection[i], selection[i-1]];
       persistSelection(); renderSelection();
     });
 
     const down = document.createElement("button");
-    down.className = "iconBtn"; down.textContent = "↓"; down.title = "Move down";
-    down.disabled = i === selection.length - 1;
+    down.className = "iconBtn"; down.textContent = "↓"; down.title = "Move down"; down.disabled = i === selection.length - 1;
     down.addEventListener("click", () => {
       if (i === selection.length - 1) return;
-      [selection[i + 1], selection[i]] = [selection[i], selection[i + 1]];
+      [selection[i+1], selection[i]] = [selection[i], selection[i+1]];
       persistSelection(); renderSelection();
     });
 
@@ -217,7 +227,6 @@ function renderSelection() {
     });
 
     btns.appendChild(up); btns.appendChild(down); btns.appendChild(del);
-
     item.appendChild(makeAvatar(p, 36));
     item.appendChild(left);
     item.appendChild(btns);
@@ -225,7 +234,7 @@ function renderSelection() {
   }
 
   const has = selection.length > 0;
-  els.copyBtn.disabled = !has;
+  els.copyBtn.disabled  = !has;
   els.clearBtn.disabled = !has;
 }
 
@@ -255,20 +264,11 @@ async function copyCaption() {
 // ── Events ────────────────────────────────────────────────────────────────────
 
 els.search.addEventListener("input", renderPeople);
-els.clearSearch.addEventListener("click", () => {
-  els.search.value = ""; renderPeople(); els.search.focus();
-});
-
+els.clearSearch.addEventListener("click", () => { els.search.value = ""; renderPeople(); els.search.focus(); });
 els.copyBtn.addEventListener("click", copyCaption);
-els.clearBtn.addEventListener("click", () => {
-  selection = []; persistSelection(); renderSelection();
-});
-els.prefixToggle.addEventListener("change", () => {
-  prefixEnabled = els.prefixToggle.checked; persistPrefix();
-});
-els.openOptions.addEventListener("click", () => {
-  window.location.href = "options.html";
-});
+els.clearBtn.addEventListener("click", () => { selection = []; persistSelection(); renderSelection(); });
+els.prefixToggle.addEventListener("change", () => { prefixEnabled = els.prefixToggle.checked; persistPrefix(); });
+els.openOptions.addEventListener("click", () => { window.location.href = "options.html"; });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
