@@ -1,15 +1,16 @@
 /**
  * github-sync.js
  *
- * Reads and writes people.json to a GitHub repository via the Contents API.
- * Photos are embedded as base64 in the JSON (same format as manual export).
+ * Two-tier config:
+ *   canRead()  — owner + repo known (explicit config OR auto-derived from GitHub Pages URL)
+ *   canWrite() — token + owner + repo set explicitly
  *
- * Storage keys in localStorage:
- *   gh_token   — Personal Access Token (fine-grained, contents R/W)
- *   gh_owner   — GitHub username / org
- *   gh_repo    — Repository name
- *   gh_branch  — Branch (default: main)
- *   gh_sha     — Cached SHA of people.json (needed for updates)
+ * This means a fresh PWA install on any device will ALWAYS auto-load
+ * people.json from the public repo with zero setup.
+ * The token is only needed to save changes.
+ *
+ * Auto-derivation: if the app is hosted at realsaibot.github.io/sip-caption-helper,
+ * owner = "realsaibot", repo = "sip-caption-helper" — no config needed for reads.
  */
 const GithubSync = (() => {
 
@@ -23,7 +24,20 @@ const GithubSync = (() => {
 
   const FILE = 'people.json';
 
-  // ── Config ───────────────────────────────────────────────────────────────
+  // ── Auto-derive owner/repo from GitHub Pages URL ─────────────────────────
+
+  function deriveFromUrl() {
+    const host = window.location.hostname;
+    if (!host.endsWith('.github.io')) return null;
+    const owner = host.replace('.github.io', '');
+    // Path: /repo-name/... or just / for username.github.io
+    const firstSegment = window.location.pathname.split('/').filter(Boolean)[0] || '';
+    // If firstSegment looks like a repo name (not a page path like index.html)
+    const repo = firstSegment && !firstSegment.includes('.') ? firstSegment : '';
+    return { owner, repo: repo || owner + '.github.io' };
+  }
+
+  // ── Config ────────────────────────────────────────────────────────────────
 
   function getConfig() {
     return {
@@ -32,6 +46,17 @@ const GithubSync = (() => {
       repo:   localStorage.getItem(K.repo)   || '',
       branch: localStorage.getItem(K.branch) || 'main',
       sha:    localStorage.getItem(K.sha)    || null,
+    };
+  }
+
+  /** Resolved owner/repo/branch — explicit config takes priority, URL-derived as fallback */
+  function getReadConfig() {
+    const c = getConfig();
+    const derived = deriveFromUrl();
+    return {
+      owner:  c.owner  || derived?.owner  || '',
+      repo:   c.repo   || derived?.repo   || '',
+      branch: c.branch || 'main',
     };
   }
 
@@ -46,14 +71,23 @@ const GithubSync = (() => {
     [K.token, K.owner, K.repo, K.branch, K.sha].forEach(k => localStorage.removeItem(k));
   }
 
-  function isConfigured() {
+  /** Can we READ? Just needs owner + repo (auto-derived is fine) */
+  function canRead() {
+    const r = getReadConfig();
+    return !!(r.owner && r.repo);
+  }
+
+  /** Can we WRITE? Needs explicit token + owner + repo */
+  function canWrite() {
     const c = getConfig();
     return !!(c.token && c.owner && c.repo);
   }
 
-  // ── Encoding helpers ─────────────────────────────────────────────────────
+  /** Legacy alias used by options.js UI */
+  function isConfigured() { return canWrite(); }
 
-  // btoa that handles Unicode (GitHub API needs base64 of UTF-8 bytes)
+  // ── Encoding helpers ──────────────────────────────────────────────────────
+
   function toBase64(str) {
     return btoa(
       encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
@@ -62,27 +96,17 @@ const GithubSync = (() => {
     );
   }
 
-  // Decode base64 back to UTF-8 string
-  function fromBase64(b64) {
-    return decodeURIComponent(
-      atob(b64).split('').map(c =>
-        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      ).join('')
-    );
-  }
-
-  // ── GitHub API helpers ───────────────────────────────────────────────────
+  // ── GitHub API helpers ────────────────────────────────────────────────────
 
   function apiHeaders(token) {
     return {
-      'Authorization': `Bearer ${token}`,
-      'Accept':        'application/vnd.github+json',
-      'Content-Type':  'application/json',
-      'X-GitHub-Api-Version': '2022-11-28',
+      'Authorization':         `Bearer ${token}`,
+      'Accept':                'application/vnd.github+json',
+      'Content-Type':          'application/json',
+      'X-GitHub-Api-Version':  '2022-11-28',
     };
   }
 
-  /** Get current SHA of people.json (needed for PUT). Returns null if file doesn't exist. */
   async function fetchSha(config) {
     const { token, owner, repo, branch } = config;
     const res = await fetch(
@@ -91,20 +115,14 @@ const GithubSync = (() => {
     );
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`GitHub ${res.status}: ${await res.text()}`);
-    const data = await res.json();
-    return data.sha;
+    return (await res.json()).sha;
   }
 
-  // ── Public API ───────────────────────────────────────────────────────────
+  // ── Public API ────────────────────────────────────────────────────────────
 
-  /**
-   * Test connection — resolves with repo info or throws with a clear message.
-   */
   async function testConnection() {
-    const config = getConfig();
-    if (!isConfigured()) throw new Error('Not configured.');
-
-    const { token, owner, repo } = config;
+    if (!canWrite()) throw new Error('Token not configured.');
+    const { token, owner, repo } = getConfig();
     const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}`,
       { headers: apiHeaders(token) }
@@ -113,48 +131,42 @@ const GithubSync = (() => {
     if (res.status === 403) throw new Error('Token lacks permission for this repo.');
     if (res.status === 404) throw new Error('Repository not found. Check owner/repo name.');
     if (!res.ok)            throw new Error(`GitHub ${res.status}`);
-    const data = await res.json();
-    return data.full_name;
+    return (await res.json()).full_name;
   }
 
   /**
-   * Load people array from GitHub.
-   * Uses raw URL (no size limit, no auth needed for public repos).
-   * Returns array or null if file doesn't exist yet.
+   * Load people.json from GitHub.
+   * Works on ANY device/install — no token needed, uses public raw URL.
+   * Returns parsed array, or null if unreachable / file missing.
    */
   async function load() {
-    if (!isConfigured()) return null;
-    const { owner, repo, branch } = getConfig();
-
-    // Cache-busting param so we always get the latest
+    if (!canRead()) return null;
+    const { owner, repo, branch } = getReadConfig();
     const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${FILE}?_=${Date.now()}`;
-    const res = await fetch(url);
-    if (res.status === 404) return null;   // file doesn't exist yet
-    if (!res.ok) throw new Error(`Failed to load from GitHub: ${res.status}`);
-    return await res.json();
+    try {
+      const res = await fetch(url);
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      console.warn('GithubSync.load failed:', e);
+      return null;
+    }
   }
 
   /**
-   * Save people array to GitHub.
-   * people: plain array (no photo field — photos come from PhotoDB via caller)
-   * photosMap: { [id]: base64 } — will be embedded into the JSON for transport
-   *
-   * On SHA conflict (409), automatically re-fetches SHA and retries once.
+   * Save people.json to GitHub.
+   * Requires token (canWrite()). Embeds photos from photosMap.
+   * Auto-retries once on SHA conflict.
    */
   async function save(people, photosMap = {}) {
-    if (!isConfigured()) throw new Error('GitHub not configured.');
+    if (!canWrite()) throw new Error('GitHub token not configured.');
 
     const config = getConfig();
     const { token, owner, repo, branch } = config;
 
-    // Embed photos into export format
-    const exportData = people.map(p => ({
-      ...p,
-      photo: photosMap[p.id] || ''
-    }));
-
-    const json    = JSON.stringify(exportData, null, 2);
-    const content = toBase64(json);
+    const exportData = people.map(p => ({ ...p, photo: photosMap[p.id] || '' }));
+    const content    = toBase64(JSON.stringify(exportData, null, 2));
 
     const _doSave = async (sha) => {
       const body = {
@@ -163,32 +175,25 @@ const GithubSync = (() => {
         branch,
       };
       if (sha) body.sha = sha;
-
       const res = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/contents/${FILE}`,
         { method: 'PUT', headers: apiHeaders(token), body: JSON.stringify(body) }
       );
-
       if (res.status === 409) return 'conflict';
       if (!res.ok) throw new Error(`GitHub ${res.status}: ${await res.text()}`);
-
-      const data = await res.json();
-      const newSha = data.content?.sha;
+      const newSha = (await res.json()).content?.sha;
       if (newSha) localStorage.setItem(K.sha, newSha);
       return 'ok';
     };
 
-    // Try with cached SHA first
     let result = await _doSave(config.sha);
-
     if (result === 'conflict') {
-      // Re-fetch fresh SHA and retry once
       const freshSha = await fetchSha(config);
       localStorage.setItem(K.sha, freshSha || '');
       result = await _doSave(freshSha);
-      if (result === 'conflict') throw new Error('Save conflict. Please reload and try again.');
+      if (result === 'conflict') throw new Error('Save conflict — please reload and retry.');
     }
   }
 
-  return { isConfigured, getConfig, setConfig, clearConfig, testConnection, load, save };
+  return { canRead, canWrite, isConfigured, getConfig, getReadConfig, setConfig, clearConfig, testConnection, load, save };
 })();

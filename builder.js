@@ -148,9 +148,9 @@ async function loadData() {
     photoCache = await PhotoDB.getMany(people.map(p => p.id));
   }
 
-  // If GitHub is configured, refresh data in background
-  // Render immediately with local data, then re-render if GitHub has updates
-  if (GithubSync.isConfigured()) {
+  // If GitHub can read (public URL — works even on fresh install with no token),
+  // refresh data in background then re-render
+  if (GithubSync.canRead()) {
     GithubSync.load()
       .then(async remote => {
         if (!remote) return;

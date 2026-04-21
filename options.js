@@ -149,8 +149,8 @@ async function load() {
     ? res.people.map(normalizePerson).filter(p => p.short && p.full)
     : [];
 
-  // 2. If GitHub is configured, fetch fresh data from there
-  if (GithubSync.isConfigured()) {
+  // 2. If GitHub can read (public URL, no token needed), fetch fresh data
+  if (GithubSync.canRead()) {
     setSyncState("syncing", "Fetching from GitHub…");
     try {
       const remote = await GithubSync.load();
@@ -168,6 +168,10 @@ async function load() {
         await storage.set({ people });
       }
       setSyncState("ok", "Synced with GitHub");
+      // Warn if token not set — read works but saves won't
+      if (!GithubSync.canWrite()) {
+        setSyncState("error", "Loaded from GitHub — enter token in settings to save changes");
+      }
     } catch (e) {
       setSyncState("error", "GitHub unreachable — using local data");
       console.warn("GitHub load failed:", e);
