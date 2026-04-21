@@ -430,6 +430,20 @@ els.clearTableSearch?.addEventListener("click", () => {
   els.tableSearch.value = ""; render(); els.tableSearch.focus();
 });
 
+// ── GitHub card toggle ────────────────────────────────────────────────────────
+
+const ghCard = document.getElementById("ghCard");
+document.getElementById("ghCardToggle").addEventListener("click", () => {
+  ghCard.classList.toggle("open");
+  localStorage.setItem("gh_card_open", ghCard.classList.contains("open") ? "1" : "0");
+});
+
+// Auto-open if not yet configured, otherwise respect last state
+const savedOpen = localStorage.getItem("gh_card_open");
+if (!GithubSync.isConfigured() || savedOpen === "1") {
+  ghCard.classList.add("open");
+}
+
 // ── GitHub settings UI ────────────────────────────────────────────────────────
 
 els.ghSaveConfig.onclick = () => {

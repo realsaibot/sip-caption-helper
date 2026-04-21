@@ -35,6 +35,44 @@ let selection    = [];
 let prefixEnabled = false;
 let photoCache   = {};
 
+// ── Photo lightbox ────────────────────────────────────────────────────────────
+
+function openPhotoLightbox(src, name) {
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,0.85);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    -webkit-tap-highlight-color:transparent;cursor:pointer;
+  `;
+
+  const img = document.createElement("img");
+  img.src = src;
+  img.style.cssText = `
+    width:220px;height:220px;border-radius:50%;object-fit:cover;
+    border:3px solid rgba(255,255,255,0.3);
+    box-shadow:0 8px 40px rgba(0,0,0,0.6);
+  `;
+
+  const label = document.createElement("div");
+  label.textContent = name;
+  label.style.cssText = `
+    color:#fff;font:700 16px/1 system-ui;
+    text-shadow:0 1px 4px rgba(0,0,0,0.5);
+  `;
+
+  const hint = document.createElement("div");
+  hint.textContent = "Tap anywhere to close";
+  hint.style.cssText = "color:rgba(255,255,255,0.4);font:13px system-ui;";
+
+  overlay.appendChild(img);
+  overlay.appendChild(label);
+  overlay.appendChild(hint);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", () => document.body.removeChild(overlay));
+}
+
 // ── Avatar helpers ────────────────────────────────────────────────────────────
 
 function getInitials(short) {
@@ -49,7 +87,12 @@ function makeAvatar(p, size) {
   if (photo) {
     const img = document.createElement("img");
     img.src = photo; img.alt = p.short;
-    img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,0.15);`;
+    img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,0.15);cursor:pointer;`;
+    img.title = `View ${p.short}`;
+    img.addEventListener("click", e => {
+      e.stopPropagation(); // don't also trigger row click
+      openPhotoLightbox(photo, p.short);
+    });
     return img;
   }
   const div = document.createElement("div");
