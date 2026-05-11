@@ -168,26 +168,36 @@ const GithubSync = (() => {
     const exportData = people.map(p => ({ ...p, photo: photosMap[p.id] || '' }));
     const content    = toBase64(JSON.stringify(exportData, null, 2));
 
-    const _doSave = async (sha) => {
+    // Always fetch a fresh SHA before saving — avoids 422 (file exists, no SHA)
+    // and stale SHA mismatches on first write after a fresh install
+    let sha = config.sha;
+    if (!sha) {
+      sha = await fetchSha(config);
+      if (sha) localStorage.setItem(K.sha, sha);
+    }
+
+    const _doSave = async (currentSha) => {
       const body = {
         message: `Update people (${new Date().toISOString().slice(0, 10)})`,
         content,
         branch,
       };
-      if (sha) body.sha = sha;
+      if (currentSha) body.sha = currentSha;
       const res = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/contents/${FILE}`,
         { method: 'PUT', headers: apiHeaders(token), body: JSON.stringify(body) }
       );
-      if (res.status === 409) return 'conflict';
+      // 409 = SHA conflict, 422 = file exists but SHA missing — both need fresh SHA
+      if (res.status === 409 || res.status === 422) return 'conflict';
       if (!res.ok) throw new Error(`GitHub ${res.status}: ${await res.text()}`);
       const newSha = (await res.json()).content?.sha;
       if (newSha) localStorage.setItem(K.sha, newSha);
       return 'ok';
     };
 
-    let result = await _doSave(config.sha);
+    let result = await _doSave(sha);
     if (result === 'conflict') {
+      // Re-fetch SHA and retry once more
       const freshSha = await fetchSha(config);
       localStorage.setItem(K.sha, freshSha || '');
       result = await _doSave(freshSha);

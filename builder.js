@@ -155,21 +155,24 @@ async function loadData() {
       .then(async remote => {
         if (!remote) return;
 
+        // If local data hasn't synced to GitHub yet, don't overwrite it
+        if (localStorage.getItem('gh_pending_save') === '1') {
+          console.info('Skipping GitHub overwrite — local has unsaved changes.');
+          return;
+        }
+
         const photoMap = {};
         const cleanedRemote = remote.map(x => {
           if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
           return normalizePerson(x);
         }).filter(p => p.short && p.full);
 
-        // Store any incoming photos
         if (Object.keys(photoMap).length) await PhotoDB.setMany(photoMap);
 
-        // Update people list and cache
         people = cleanedRemote;
         await storage.set({ people });
         photoCache = await PhotoDB.getMany(people.map(p => p.id));
 
-        // Re-render with fresh data
         renderPeople();
       })
       .catch(e => console.warn("GitHub fetch failed on builder load:", e));

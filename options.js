@@ -154,8 +154,8 @@ async function load() {
     setSyncState("syncing", "Fetching from GitHub…");
     try {
       const remote = await GithubSync.load();
-      if (remote !== null) {
-        // Extract photos from remote data → store in IndexedDB
+      if (remote !== null && localStorage.getItem('gh_pending_save') !== '1') {
+        // Only overwrite local if there's no unsaved local changes pending
         const photoMap = {};
         const cleanedRemote = remote.map(x => {
           if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
@@ -168,8 +168,9 @@ async function load() {
         await storage.set({ people });
       }
       setSyncState("ok", "Synced with GitHub");
-      // Warn if token not set — read works but saves won't
-      if (!GithubSync.canWrite()) {
+      if (localStorage.getItem('gh_pending_save') === '1') {
+        setSyncState("error", "Unsynced local changes — retry saving or re-enter token");
+      } else if (!GithubSync.canWrite()) {
         setSyncState("error", "Loaded from GitHub — enter token in settings to save changes");
       }
     } catch (e) {
@@ -191,16 +192,18 @@ async function saveLocal() {
 async function saveAll() {
   await saveLocal();
 
-  if (!GithubSync.isConfigured()) return;
+  if (!GithubSync.canWrite()) return;
 
   setSyncState("syncing", "Saving…");
   try {
     const allPhotos = await PhotoDB.getAll();
     await GithubSync.save(people, allPhotos);
+    localStorage.removeItem('gh_pending_save');
     setSyncState("ok", "Saved to GitHub ✓");
   } catch (e) {
-    setSyncState("error", "GitHub save failed — saved locally");
-    console.warn("GitHub save failed:", e);
+    localStorage.setItem('gh_pending_save', '1');
+    setSyncState("error", `GitHub save failed — saved locally (${e.message})`);
+    console.warn("GitHub save failed:", e.message);
   }
 }
 
