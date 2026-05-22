@@ -1,5 +1,5 @@
 // sw.js — bump CACHE_NAME whenever you deploy new files
-const CACHE_NAME = 'caption-helper-v4';
+const CACHE_NAME = 'caption-helper-v5';
 
 const PRECACHE = [
   '/',
@@ -7,6 +7,7 @@ const PRECACHE = [
   '/options.html',
   '/builder.css',
   '/builder.js',
+  '/github-sync.js',
   '/options.js',
   '/photo-db.js',
   '/face-engine.js',

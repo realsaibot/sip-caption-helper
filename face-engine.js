@@ -36,6 +36,13 @@ const FaceEngine = (() => {
         faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
       ]);
 
+      // Warm up: first WebGL inference compiles shaders and is unreliable.
+      // Running a dummy pass on a blank canvas primes the GPU pipeline.
+      const warmup = document.createElement('canvas');
+      warmup.width = 32; warmup.height = 32;
+      await faceapi.detectAllFaces(warmup,
+        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.9, inputSize: 128 }));
+
       return faceapi;
     })();
 
