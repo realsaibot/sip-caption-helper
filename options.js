@@ -333,7 +333,7 @@ function renderEditRow(i, currentPhoto) {
   angleBtn.onclick = () => angleFileInput.click();
 
   const angleStatus = document.createElement('div');
-  angleStatus.style.cssText = 'font-size:11px;color:rgba(255,255,255,0.45);min-height:14px;margin-top:2px;';
+  angleStatus.style.cssText = 'font-size:11px;color:#555;min-height:14px;margin-top:2px;';
 
   // Show existing angle count
   PhotoDB.getDescriptors(p.id).then(existing => {
@@ -349,19 +349,23 @@ function renderEditRow(i, currentPhoto) {
     try {
       const cropped = await CropPicker.open(file);
       if (!cropped) return;
-      angleStatus.textContent = 'Learning\u2026';
+      angleStatus.textContent = 'Loading AI models\u2026';
+      setSyncState('syncing', 'Learning angle\u2026');
       const desc = await FaceEngine.extractDescriptor(cropped);
       if (desc) {
         await PhotoDB.appendDescriptor(p.id, desc);
         const all = await PhotoDB.getDescriptors(p.id);
         angleStatus.textContent = `\u2713 ${all.length} angle${all.length > 1 ? 's' : ''} stored`;
+        setSyncState('ok', `Angle saved \u2713`);
       } else {
-        angleStatus.textContent = 'No face detected.';
+        angleStatus.textContent = 'No face detected \u2014 try a clearer photo.';
+        setSyncState('idle', '');
       }
     } catch (ex) {
       angleStatus.textContent = 'Error: ' + ex.message;
+      setSyncState('idle', '');
     }
-    setTimeout(() => { angleStatus.textContent = ''; }, 3000);
+    setTimeout(() => { angleStatus.textContent = ''; setSyncState('idle', ''); }, 4000);
   });
 
   avatarWrap.appendChild(angleBtn);

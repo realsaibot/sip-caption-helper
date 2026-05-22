@@ -9,14 +9,14 @@ const FaceEngine = (() => {
   const CDN_SCRIPT = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/dist/face-api.js';
   const MODEL_URL  = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model';
 
-  let _loadPromise = null;
+  let _baseLoadPromise = null;  // tiny + landmarks + recognition (~1MB total)
+  let _fullLoadPromise = null;  // + SSD MobileNet (~6MB, only for group detection)
 
-  /** Load face-api script + models exactly once per session. */
-  function _ensureLoaded() {
-    if (_loadPromise) return _loadPromise;
+  /** Load script + lightweight models (used by extractDescriptor). */
+  function _ensureBase() {
+    if (_baseLoadPromise) return _baseLoadPromise;
 
-    _loadPromise = (async () => {
-      // 1. Inject script tag if not already present
+    _baseLoadPromise = (async () => {
       if (!window.faceapi) {
         await new Promise((resolve, reject) => {
           const s = document.createElement('script');
@@ -29,29 +29,43 @@ const FaceEngine = (() => {
 
       const faceapi = window.faceapi;
 
-      // 2. Load the required models
       await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
         faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
       ]);
 
-      // Warm up: first WebGL inference compiles shaders and is unreliable.
-      // Running a dummy pass on a blank canvas primes the GPU pipeline.
+      // Warm up tiny detector
       const warmup = document.createElement('canvas');
       warmup.width = 64; warmup.height = 64;
-      await Promise.all([
-        faceapi.detectAllFaces(warmup,
-          new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.9, inputSize: 128 })),
-        faceapi.detectAllFaces(warmup,
-          new faceapi.SsdMobilenetv1Options({ minConfidence: 0.9 })),
-      ]);
+      await faceapi.detectAllFaces(warmup,
+        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.9, inputSize: 128 }));
 
       return faceapi;
     })();
 
-    return _loadPromise;
+    return _baseLoadPromise;
+  }
+
+  /** Load SSD MobileNet on top of base (used by recognizeGroup). */
+  function _ensureFull() {
+    if (_fullLoadPromise) return _fullLoadPromise;
+
+    _fullLoadPromise = (async () => {
+      const faceapi = await _ensureBase();
+
+      await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+
+      // Warm up SSD
+      const warmup = document.createElement('canvas');
+      warmup.width = 64; warmup.height = 64;
+      await faceapi.detectAllFaces(warmup,
+        new faceapi.SsdMobilenetv1Options({ minConfidence: 0.9 }));
+
+      return faceapi;
+    })();
+
+    return _fullLoadPromise;
   }
 
   /**
@@ -107,7 +121,7 @@ const FaceEngine = (() => {
    * Returns a plain Array<number> (serializable) or null if no face detected.
    */
   async function extractDescriptor(base64) {
-    const faceapi = await _ensureLoaded();
+    const faceapi = await _ensureBase();
     const img     = await _imgFromBase64(base64);
 
     const options = new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.3, inputSize: 224 });
@@ -132,7 +146,7 @@ const FaceEngine = (() => {
    * @returns {Promise<Array<{ box:{x,y,w,h}, matchId:string|null, distance:number, faceDataUrl:string }>>}
    */
   async function recognizeGroup(file, people, onProgress) {
-    const faceapi = await _ensureLoaded();
+    const faceapi = await _ensureFull();
     const progress = typeof onProgress === 'function' ? onProgress : () => {};
 
     progress('Loading image…');
