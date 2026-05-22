@@ -29,9 +29,10 @@ const FaceEngine = (() => {
 
       const faceapi = window.faceapi;
 
-      // 2. Load the three required models
+      // 2. Load the required models
       await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
         faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
       ]);
@@ -39,9 +40,13 @@ const FaceEngine = (() => {
       // Warm up: first WebGL inference compiles shaders and is unreliable.
       // Running a dummy pass on a blank canvas primes the GPU pipeline.
       const warmup = document.createElement('canvas');
-      warmup.width = 32; warmup.height = 32;
-      await faceapi.detectAllFaces(warmup,
-        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.9, inputSize: 128 }));
+      warmup.width = 64; warmup.height = 64;
+      await Promise.all([
+        faceapi.detectAllFaces(warmup,
+          new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.9, inputSize: 128 })),
+        faceapi.detectAllFaces(warmup,
+          new faceapi.SsdMobilenetv1Options({ minConfidence: 0.9 })),
+      ]);
 
       return faceapi;
     })();
@@ -121,8 +126,8 @@ const FaceEngine = (() => {
    * Detect and recognize faces in a group photo.
    *
    * @param {File}   file        - The group photo file
-   * @param {Array}  people      - Array of { id, short, full, category, descriptor: Array|null }
-   *                               Only entries WITH a descriptor are used for matching
+   * @param {Array}  people      - Array of { id, short, full, category, descriptors: Array<Array<number>> }
+   *                               Only entries WITH descriptors are used for matching
    * @param {Function} onProgress - Optional callback(msg)
    * @returns {Promise<Array<{ box:{x,y,w,h}, matchId:string|null, distance:number, faceDataUrl:string }>>}
    */
@@ -147,7 +152,7 @@ const FaceEngine = (() => {
 
     progress('Detecting faces…');
 
-    const options = new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2, inputSize: 608 });
+    const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.25 });
     const detections = await faceapi
       .detectAllFaces(canvas, options)
       .withFaceLandmarks(true)
@@ -157,10 +162,13 @@ const FaceEngine = (() => {
 
     progress(`Matching ${detections.length} face(s)…`);
 
-    // Build LabeledFaceDescriptors for people who have a descriptor
+    // Build LabeledFaceDescriptors for people who have descriptors
     const labeled = people
-      .filter(p => Array.isArray(p.descriptor) && p.descriptor.length)
-      .map(p => new faceapi.LabeledFaceDescriptors(p.id, [new Float32Array(p.descriptor)]));
+      .filter(p => Array.isArray(p.descriptors) && p.descriptors.length)
+      .map(p => new faceapi.LabeledFaceDescriptors(
+        p.id,
+        p.descriptors.map(d => new Float32Array(d))
+      ));
 
     const THRESHOLD = 0.52;
     const matcher = labeled.length

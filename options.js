@@ -322,6 +322,52 @@ function renderEditRow(i, currentPhoto) {
 
   removeBtn.onclick = () => { editPhoto = null; refreshEditAvatar(); removeBtn.style.display = "none"; };
 
+  // ── Extra angles ─────────────────────────────────────────────────────────
+  const angleBtn = document.createElement('button');
+  angleBtn.textContent = '📐 + Angle';
+  angleBtn.title = 'Add extra face angle for better recognition';
+  angleBtn.style.cssText = 'font-size:11px;color:#3b82f6;background:none;border:1px solid #3b82f6;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;margin-top:4px;';
+
+  const angleFileInput = document.createElement('input');
+  angleFileInput.type = 'file'; angleFileInput.accept = 'image/*'; angleFileInput.hidden = true;
+  angleBtn.onclick = () => angleFileInput.click();
+
+  const angleStatus = document.createElement('div');
+  angleStatus.style.cssText = 'font-size:11px;color:rgba(255,255,255,0.45);min-height:14px;margin-top:2px;';
+
+  // Show existing angle count
+  PhotoDB.getDescriptors(p.id).then(existing => {
+    if (existing.length > 0) {
+      angleStatus.textContent = `${existing.length} angle${existing.length > 1 ? 's' : ''} stored`;
+      setTimeout(() => { if (angleStatus.textContent.includes('stored')) angleStatus.textContent = ''; }, 2500);
+    }
+  });
+
+  angleFileInput.addEventListener('change', async e => {
+    const file = e.target.files?.[0]; e.target.value = '';
+    if (!file) return;
+    try {
+      const cropped = await CropPicker.open(file);
+      if (!cropped) return;
+      angleStatus.textContent = 'Learning\u2026';
+      const desc = await FaceEngine.extractDescriptor(cropped);
+      if (desc) {
+        await PhotoDB.appendDescriptor(p.id, desc);
+        const all = await PhotoDB.getDescriptors(p.id);
+        angleStatus.textContent = `\u2713 ${all.length} angle${all.length > 1 ? 's' : ''} stored`;
+      } else {
+        angleStatus.textContent = 'No face detected.';
+      }
+    } catch (ex) {
+      angleStatus.textContent = 'Error: ' + ex.message;
+    }
+    setTimeout(() => { angleStatus.textContent = ''; }, 3000);
+  });
+
+  avatarWrap.appendChild(angleBtn);
+  avatarWrap.appendChild(angleFileInput);
+  avatarWrap.appendChild(angleStatus);
+
   tr.children[1].innerHTML = `<input data-field="short" value="${attr(p.short)}" /><div class="mono">${escapeHtml(p.id)}</div>`;
   tr.children[2].innerHTML = `<input data-field="category" value="${attr(p.category || "")}" />`;
   tr.children[3].innerHTML = `<textarea data-field="full">${escapeHtml(p.full)}</textarea>`;
@@ -351,7 +397,7 @@ function renderEditRow(i, currentPhoto) {
           setSyncState('syncing', 'Learning face…');
           const descriptor = await FaceEngine.extractDescriptor(photoBase64);
           if (descriptor) {
-            await PhotoDB.setDescriptor(p.id, descriptor);
+            await PhotoDB.setDescriptor(p.id, [descriptor]);
             setSyncState('ok', 'Face learned ✓');
           } else {
             setSyncState('idle', '');
@@ -404,7 +450,7 @@ els.add.onclick = async () => {
         setSyncState('syncing', 'Learning face…');
         const descriptor = await FaceEngine.extractDescriptor(photoBase64);
         if (descriptor) {
-          await PhotoDB.setDescriptor(person.id, descriptor);
+          await PhotoDB.setDescriptor(person.id, [descriptor]);
           setSyncState('ok', 'Face learned ✓');
         } else {
           setSyncState('idle', '');

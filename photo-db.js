@@ -160,5 +160,34 @@ const PhotoDB = (() => {
     });
   }
 
-  return { get, set, remove, getMany, getAll, setMany, setDescriptor, getDescriptor, getAllDescriptors, removeDescriptor };
+  /** Normalize stored value to Array<Array<number>> (handles legacy single flat-array descriptor). */
+  function _normalizeDescriptors(raw) {
+    if (!raw || !raw.length) return [];
+    return typeof raw[0] === 'number' ? [raw] : raw;
+  }
+
+  /** Get descriptors for a person as Array<Array<number>>. */
+  async function getDescriptors(id) {
+    return _normalizeDescriptors(await getDescriptor(id));
+  }
+
+  /** Append one descriptor array to a person's stored list. */
+  async function appendDescriptor(id, descriptorArray) {
+    const existing = await getDescriptors(id);
+    existing.push(descriptorArray);
+    return setDescriptor(id, existing);
+  }
+
+  /** Get all descriptors as { [id]: Array<Array<number>> } — normalized. */
+  async function getAllDescriptorsNormalized() {
+    const raw = await getAllDescriptors();
+    const out = {};
+    for (const [id, val] of Object.entries(raw)) {
+      const norm = _normalizeDescriptors(val);
+      if (norm.length) out[id] = norm;
+    }
+    return out;
+  }
+
+  return { get, set, remove, getMany, getAll, setMany, setDescriptor, getDescriptor, getAllDescriptors, removeDescriptor, getDescriptors, appendDescriptor, getAllDescriptorsNormalized };
 })();

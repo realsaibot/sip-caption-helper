@@ -507,7 +507,7 @@ els.recognizeFile.addEventListener('change', async (e) => {
   showToast('Analyzing faces\u2026');
 
   try {
-    const allDescriptors = await PhotoDB.getAllDescriptors();
+    const allDescriptors = await PhotoDB.getAllDescriptorsNormalized();
 
     // Backfill: extract descriptors for people who have a photo but no descriptor yet
     const needsBackfill = people.filter(p => photoCache[p.id] && !allDescriptors[p.id]);
@@ -517,8 +517,8 @@ els.recognizeFile.addEventListener('change', async (e) => {
         try {
           const desc = await FaceEngine.extractDescriptor(photoCache[p.id]);
           if (desc) {
-            await PhotoDB.setDescriptor(p.id, desc);
-            allDescriptors[p.id] = desc;
+            await PhotoDB.setDescriptor(p.id, [desc]);
+            allDescriptors[p.id] = [desc];
           }
         } catch (ex) {
           console.warn('Descriptor backfill failed for', p.id, ex);
@@ -528,8 +528,8 @@ els.recognizeFile.addEventListener('change', async (e) => {
     }
 
     const peopleWithDesc = people
-      .map(p => ({ ...p, descriptor: allDescriptors[p.id] || null }))
-      .filter(p => p.descriptor);
+      .map(p => ({ ...p, descriptors: allDescriptors[p.id] || null }))
+      .filter(p => p.descriptors && p.descriptors.length);
 
     if (!peopleWithDesc.length) {
       showToast('No face data yet \u2014 add photos to people in Options first.');
