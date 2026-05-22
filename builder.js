@@ -508,6 +508,25 @@ els.recognizeFile.addEventListener('change', async (e) => {
 
   try {
     const allDescriptors = await PhotoDB.getAllDescriptors();
+
+    // Backfill: extract descriptors for people who have a photo but no descriptor yet
+    const needsBackfill = people.filter(p => photoCache[p.id] && !allDescriptors[p.id]);
+    if (needsBackfill.length) {
+      showToast(`Learning ${needsBackfill.length} face${needsBackfill.length !== 1 ? 's' : ''}\u2026`);
+      for (const p of needsBackfill) {
+        try {
+          const desc = await FaceEngine.extractDescriptor(photoCache[p.id]);
+          if (desc) {
+            await PhotoDB.setDescriptor(p.id, desc);
+            allDescriptors[p.id] = desc;
+          }
+        } catch (ex) {
+          console.warn('Descriptor backfill failed for', p.id, ex);
+        }
+      }
+      showToast('Analyzing faces\u2026');
+    }
+
     const peopleWithDesc = people
       .map(p => ({ ...p, descriptor: allDescriptors[p.id] || null }))
       .filter(p => p.descriptor);
