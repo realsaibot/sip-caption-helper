@@ -249,6 +249,7 @@ async function render() {
 
     tr.querySelector('[data-action="delete"]').onclick = async () => {
       await PhotoDB.remove(p.id);
+      await PhotoDB.removeDescriptor(p.id);
       people.splice(trueIndex, 1);
       await saveAll();
       await render();
@@ -341,6 +342,26 @@ function renderEditRow(i, currentPhoto) {
     await saveAll();
     await render();
     setStatus("Saved ✅", "ok");
+
+    // Fire-and-forget: extract face descriptor in background
+    if (editPhoto) {
+      const photoBase64 = editPhoto;
+      (async () => {
+        try {
+          setSyncState('syncing', 'Learning face…');
+          const descriptor = await FaceEngine.extractDescriptor(photoBase64);
+          if (descriptor) {
+            await PhotoDB.setDescriptor(p.id, descriptor);
+            setSyncState('ok', 'Face learned ✓');
+          } else {
+            setSyncState('idle', '');
+          }
+        } catch(e) {
+          setSyncState('idle', '');
+        }
+        setTimeout(() => setSyncState('idle', ''), 2000);
+      })();
+    }
   };
 }
 
@@ -365,7 +386,8 @@ els.add.onclick = async () => {
   if (!short || !full) { setStatus("Short and Full are required.", "warn"); return; }
 
   const person = normalizePerson({ short, category, full });
-  if (pendingPhoto) await PhotoDB.set(person.id, pendingPhoto);
+  const photoBase64 = pendingPhoto || "";
+  if (photoBase64) await PhotoDB.set(person.id, photoBase64);
   people.unshift(person);
 
   els.short.value = ""; els.category.value = ""; els.full.value = "";
@@ -374,6 +396,25 @@ els.add.onclick = async () => {
   await saveAll();
   await render();
   setStatus("Added ✅", "ok");
+
+  // Fire-and-forget: extract face descriptor in background
+  if (photoBase64) {
+    (async () => {
+      try {
+        setSyncState('syncing', 'Learning face…');
+        const descriptor = await FaceEngine.extractDescriptor(photoBase64);
+        if (descriptor) {
+          await PhotoDB.setDescriptor(person.id, descriptor);
+          setSyncState('ok', 'Face learned ✓');
+        } else {
+          setSyncState('idle', '');
+        }
+      } catch(e) {
+        setSyncState('idle', '');
+      }
+      setTimeout(() => setSyncState('idle', ''), 2000);
+    })();
+  }
 };
 
 // ── Export / Import ───────────────────────────────────────────────────────────

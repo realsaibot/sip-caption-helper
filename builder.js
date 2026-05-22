@@ -16,18 +16,20 @@ const storage = {
 };
 
 const els = {
-  search:       document.getElementById("search"),
-  clearSearch:  document.getElementById("clearSearch"),
-  peopleList:   document.getElementById("peopleList"),
-  emptyState:   document.getElementById("emptyState"),
-  count:        document.getElementById("count"),
-  selection:    document.getElementById("selection"),
-  selCount:     document.getElementById("selCount"),
-  copyBtn:      document.getElementById("copyBtn"),
-  clearBtn:     document.getElementById("clearBtn"),
-  prefixToggle: document.getElementById("prefixToggle"),
-  openOptions:  document.getElementById("openOptions"),
-  toast:        document.getElementById("toast")
+  search:        document.getElementById("search"),
+  clearSearch:   document.getElementById("clearSearch"),
+  peopleList:    document.getElementById("peopleList"),
+  emptyState:    document.getElementById("emptyState"),
+  count:         document.getElementById("count"),
+  selection:     document.getElementById("selection"),
+  selCount:      document.getElementById("selCount"),
+  copyBtn:       document.getElementById("copyBtn"),
+  clearBtn:      document.getElementById("clearBtn"),
+  prefixToggle:  document.getElementById("prefixToggle"),
+  openOptions:   document.getElementById("openOptions"),
+  toast:         document.getElementById("toast"),
+  recognizeBtn:  document.getElementById("recognizeBtn"),
+  recognizeFile: document.getElementById("recognizeFile"),
 };
 
 let people       = [];
@@ -307,6 +309,183 @@ async function copyCaption() {
   }
 }
 
+// ── RecognizeModal ────────────────────────────────────────────────────────────
+
+const RecognizeModal = (() => {
+  let _overlay = null;
+
+  function _remove() {
+    if (_overlay && _overlay.parentNode) _overlay.parentNode.removeChild(_overlay);
+    _overlay = null;
+  }
+
+  function open(results, people) {
+    _remove();
+
+    // Build a quick id → person lookup
+    const byId = {};
+    for (const p of people) byId[p.id] = p;
+
+    _overlay = document.createElement('div');
+    _overlay.style.cssText = [
+      'position:fixed;inset:0;z-index:9999;',
+      'background:rgba(0,0,0,0.92);',
+      'display:flex;flex-direction:column;',
+      'align-items:center;justify-content:flex-start;',
+      'overflow-y:auto;',
+      '-webkit-tap-highlight-color:transparent;',
+    ].join('');
+
+    // ── Modal card ──────────────────────────────────────────────────────────
+    const card = document.createElement('div');
+    card.style.cssText = [
+      'background:#1a1b20;border-radius:18px;',
+      'padding:24px 20px 20px;margin:24px 16px;',
+      'width:100%;max-width:480px;box-sizing:border-box;',
+      'display:flex;flex-direction:column;gap:16px;',
+    ].join('');
+    card.addEventListener('click', e => e.stopPropagation());
+
+    // Title
+    const title = document.createElement('div');
+    title.style.cssText = 'font:700 17px/1.3 system-ui;color:#fff;';
+    title.textContent = `\uD83D\uDD0D Face Recognition \u2014 ${results.length} face${results.length !== 1 ? 's' : ''} detected`;
+    card.appendChild(title);
+
+    // Face rows
+    const rows = []; // { el, matchId, checked }
+
+    const list = document.createElement('div');
+    list.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+
+    for (const det of results) {
+      const person   = det.matchId ? byId[det.matchId] || null : null;
+      const isMatch  = !!person;
+      const conf     = Math.round((1 - det.distance) * 100);
+      const confColor = det.distance < 0.35 ? '#22c55e' : det.distance < 0.52 ? '#f59e0b' : '#9ca3af';
+
+      const row = document.createElement('div');
+      row.style.cssText = [
+        'display:flex;align-items:center;gap:12px;',
+        'background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;',
+      ].join('');
+
+      // Face thumbnail
+      const thumb = document.createElement('div');
+      thumb.style.cssText = [
+        'width:48px;height:48px;border-radius:50%;flex-shrink:0;overflow:hidden;',
+        'background:#374151;border:2px solid rgba(255,255,255,0.12);',
+        'display:flex;align-items:center;justify-content:center;',
+      ].join('');
+      if (det.faceDataUrl) {
+        const img = document.createElement('img');
+        img.src = det.faceDataUrl;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+        thumb.appendChild(img);
+      } else {
+        thumb.style.color = '#9ca3af';
+        thumb.style.fontSize = '18px';
+        thumb.textContent = '?';
+      }
+
+      // Info column
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+
+      const nameEl = document.createElement('div');
+      nameEl.style.cssText = `font:700 14px/1.3 system-ui;color:${isMatch ? '#fff' : '#9ca3af'};`;
+      nameEl.textContent = isMatch ? person.short : 'Unknown';
+
+      const confRow = document.createElement('div');
+      confRow.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:4px;';
+
+      const confBar = document.createElement('div');
+      confBar.style.cssText = [
+        `width:${Math.max(4, conf)}%;height:4px;border-radius:2px;`,
+        `background:${confColor};transition:width 0.3s;`,
+        'max-width:120px;',
+      ].join('');
+
+      const confLabel = document.createElement('div');
+      confLabel.style.cssText = `font:12px system-ui;color:${confColor};`;
+      confLabel.textContent = `${conf}%`;
+
+      confRow.appendChild(confBar);
+      confRow.appendChild(confLabel);
+      info.appendChild(nameEl);
+      info.appendChild(confRow);
+
+      row.appendChild(thumb);
+      row.appendChild(info);
+
+      // Checkbox (only for matched faces)
+      let checkbox = null;
+      if (isMatch) {
+        checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = true;
+        checkbox.style.cssText = 'width:18px;height:18px;flex-shrink:0;accent-color:#3b82f6;cursor:pointer;';
+        checkbox.addEventListener('change', () => updateConfirmBtn());
+        row.appendChild(checkbox);
+      }
+
+      list.appendChild(row);
+      rows.push({ matchId: det.matchId, checkbox });
+    }
+    card.appendChild(list);
+
+    // ── Bottom actions ──────────────────────────────────────────────────────
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.style.cssText = [
+      'flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;',
+      'background:#3b82f6;color:#fff;font:700 15px system-ui;',
+    ].join('');
+
+    function countChecked() {
+      return rows.filter(r => r.checkbox && r.checkbox.checked).length;
+    }
+    function updateConfirmBtn() {
+      const n = countChecked();
+      confirmBtn.textContent = `Add ${n} ${n === 1 ? 'person' : 'people'} to selection`;
+      confirmBtn.disabled = n === 0;
+    }
+    updateConfirmBtn();
+
+    confirmBtn.addEventListener('click', () => {
+      for (const r of rows) {
+        if (r.checkbox && r.checkbox.checked && r.matchId) {
+          const p = byId[r.matchId];
+          if (p) selection.push({ ...p });
+        }
+      }
+      persistSelection();
+      renderSelection();
+      _remove();
+    });
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.cssText = [
+      'padding:12px 18px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.2);',
+      'background:transparent;color:rgba(255,255,255,0.7);font:700 15px system-ui;cursor:pointer;',
+    ].join('');
+    cancelBtn.addEventListener('click', _remove);
+
+    actions.appendChild(confirmBtn);
+    actions.appendChild(cancelBtn);
+    card.appendChild(actions);
+
+    _overlay.appendChild(card);
+    _overlay.addEventListener('click', _remove);
+    document.body.appendChild(_overlay);
+  }
+
+  return { open };
+})();
+
 // ── Events ────────────────────────────────────────────────────────────────────
 
 els.search.addEventListener("input", renderPeople);
@@ -315,6 +494,42 @@ els.copyBtn.addEventListener("click", copyCaption);
 els.clearBtn.addEventListener("click", () => { selection = []; persistSelection(); renderSelection(); });
 els.prefixToggle.addEventListener("change", () => { prefixEnabled = els.prefixToggle.checked; persistPrefix(); });
 els.openOptions.addEventListener("click", () => { window.location.href = "options.html"; });
+
+// ── Recognition trigger ───────────────────────────────────────────────────────
+
+els.recognizeBtn.addEventListener('click', () => els.recognizeFile.click());
+
+els.recognizeFile.addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  e.target.value = '';
+  if (!file) return;
+
+  showToast('Analyzing faces\u2026');
+
+  try {
+    const allDescriptors = await PhotoDB.getAllDescriptors();
+    const peopleWithDesc = people
+      .map(p => ({ ...p, descriptor: allDescriptors[p.id] || null }))
+      .filter(p => p.descriptor);
+
+    if (!peopleWithDesc.length) {
+      showToast('No face data yet \u2014 add photos to people in Options first.');
+      return;
+    }
+
+    const results = await FaceEngine.recognizeGroup(file, peopleWithDesc);
+
+    if (!results.length) {
+      showToast('No faces detected in this photo.');
+      return;
+    }
+
+    RecognizeModal.open(results, people);
+  } catch (err) {
+    console.error(err);
+    showToast('Recognition failed: ' + err.message);
+  }
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 

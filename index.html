@@ -20,6 +20,8 @@
     <div class="sub">Click names in left → right order.</div>
   </div>
   <div class="topBtns">
+    <button id="recognizeBtn" class="iconBtn" title="Recognize faces in a photo">📷 Recognize</button>
+    <input id="recognizeFile" type="file" accept="image/*" hidden>
     <button id="openOptions" class="iconBtn" title="Options">⚙️ Options</button>
   </div>
 </header>
@@ -62,8 +64,9 @@
   </section>
 </div>
 
-<!-- photo-db.js must load before builder.js -->
+<!-- photo-db.js and face-engine.js must load before builder.js -->
 <script src="photo-db.js"></script>
+<script src="face-engine.js"></script>
 <script src="builder.js"></script>
 <script>
   if ('serviceWorker' in navigator) {

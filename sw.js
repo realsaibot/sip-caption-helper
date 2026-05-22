@@ -9,6 +9,7 @@ const PRECACHE = [
   '/builder.js',
   '/options.js',
   '/photo-db.js',
+  '/face-engine.js',
   '/crop-picker.js',
   '/manifest.webmanifest'
 ];
