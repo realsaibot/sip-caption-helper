@@ -516,7 +516,7 @@ const RecognizeModal = (() => {
       const person   = det.matchId ? byId[det.matchId] || null : null;
       const isMatch  = !!person;
       const conf     = Math.round((1 - det.distance) * 100);
-      const confColor = det.distance < 0.35 ? '#22c55e' : det.distance < 0.52 ? '#f59e0b' : '#9ca3af';
+      const confColor = det.distance < 0.3 ? '#22c55e' : det.distance < 0.45 ? '#f59e0b' : '#9ca3af';
 
       const row = document.createElement('div');
       row.style.cssText = [

@@ -196,7 +196,7 @@ const FaceEngine = (() => {
         p.descriptors.map(d => new Float32Array(d))
       ));
 
-    const THRESHOLD = 0.6;
+    const THRESHOLD = 0.45;
     const matcher = labeled.length
       ? new faceapi.FaceMatcher(labeled, THRESHOLD)
       : null;
