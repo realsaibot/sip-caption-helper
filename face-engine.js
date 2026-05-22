@@ -124,11 +124,23 @@ const FaceEngine = (() => {
     const faceapi = await _ensureBase();
     const img     = await _imgFromBase64(base64);
 
-    const options = new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.3, inputSize: 224 });
-    const result  = await faceapi
-      .detectSingleFace(img, options)
+    // Try TinyFaceDetector first (fast). If it misses (common for angled faces),
+    // fall back to SSD MobileNet which handles non-frontal faces much better.
+    let result = await faceapi
+      .detectSingleFace(img,
+        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2, inputSize: 224 }))
       .withFaceLandmarks(true)
       .withFaceDescriptor();
+
+    if (!result) {
+      // SSD fallback — loads the heavier model on demand
+      const faceapiFull = await _ensureFull();
+      result = await faceapiFull
+        .detectSingleFace(img,
+          new faceapi.SsdMobilenetv1Options({ minConfidence: 0.2 }))
+        .withFaceLandmarks(true)
+        .withFaceDescriptor();
+    }
 
     if (!result) return null;
 
@@ -184,7 +196,7 @@ const FaceEngine = (() => {
         p.descriptors.map(d => new Float32Array(d))
       ));
 
-    const THRESHOLD = 0.52;
+    const THRESHOLD = 0.6;
     const matcher = labeled.length
       ? new faceapi.FaceMatcher(labeled, THRESHOLD)
       : null;
