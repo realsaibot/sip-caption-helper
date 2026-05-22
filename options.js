@@ -194,6 +194,10 @@ async function saveAll() {
 
   if (!GithubSync.canWrite()) return;
 
+  // Mark pending BEFORE the await so that if the user navigates away
+  // mid-save, the builder's background GitHub fetch won't overwrite
+  // localStorage with stale remote data that doesn't have the new entry.
+  localStorage.setItem('gh_pending_save', '1');
   setSyncState("syncing", "Saving…");
   try {
     const allPhotos = await PhotoDB.getAll();
@@ -201,7 +205,6 @@ async function saveAll() {
     localStorage.removeItem('gh_pending_save');
     setSyncState("ok", "Saved to GitHub ✓");
   } catch (e) {
-    localStorage.setItem('gh_pending_save', '1');
     setSyncState("error", `GitHub save failed — saved locally (${e.message})`);
     console.warn("GitHub save failed:", e.message);
   }

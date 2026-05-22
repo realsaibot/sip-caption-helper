@@ -1,5 +1,5 @@
 // sw.js — bump CACHE_NAME whenever you deploy new files
-const CACHE_NAME = 'caption-helper-v3';
+const CACHE_NAME = 'caption-helper-v4';
 
 const PRECACHE = [
   '/',
@@ -34,9 +34,15 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Network-first: serve fresh JS/HTML immediately so updates land on next load.
+  // Falls back to cache when offline.
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(res => {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+        return res;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

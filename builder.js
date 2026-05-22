@@ -318,8 +318,18 @@ els.openOptions.addEventListener("click", () => { window.location.href = "option
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-(async function init() {
+async function init() {
+  els.search.value = ""; // clear any browser-retained filter value
   await loadData();
   renderPeople();
   renderSelection();
-})();
+}
+
+// Re-run init when browser restores the page from bfcache (back/forward nav).
+// Without this: selection array is intact in memory but the right panel DOM
+// was never re-rendered, so items appear missing until the first click.
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) init();
+});
+
+init();
