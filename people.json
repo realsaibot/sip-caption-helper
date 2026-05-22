@@ -320,5 +320,33 @@
     "full": "Ministre des Affaires étrangères et de la Défense d'Islande, Þorgerður Katrín Gunnarsdóttir",
     "category": "Iceland",
     "photo": ""
+  },
+  {
+    "id": "carl-xvi-gustaf",
+    "short": "Carl XVI Gustaf",
+    "full": "Roi de Suède, Carl XVI Gustaf",
+    "category": "Suède",
+    "photo": ""
+  },
+  {
+    "id": "silvia",
+    "short": "Reine Silvia",
+    "full": "Reine de Suède, Silvia",
+    "category": "Suède",
+    "photo": ""
+  },
+  {
+    "id": "kristersson",
+    "short": "Ulf Kristersson",
+    "full": "Premier ministre de Suède, Ulf Kristersson",
+    "category": "Suède",
+    "photo": ""
+  },
+  {
+    "id": "malmer-stenergard",
+    "short": "Maria Malmer Stenergard",
+    "full": "Ministre des Affaires étrangères de Suède, Maria Malmer Stenergard",
+    "category": "Suède",
+    "photo": ""
   }
 ]
