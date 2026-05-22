@@ -309,6 +309,160 @@ async function copyCaption() {
   }
 }
 
+// ── RecognizeProgress ─────────────────────────────────────────────────────────
+
+const RecognizeProgress = (() => {
+  let _overlay = null, _bar = null, _msgEl = null, _stepEls = {};
+
+  const STEPS = [
+    { id: 'load',   label: 'Loading AI' },
+    { id: 'detect', label: 'Detecting faces' },
+    { id: 'match',  label: 'Matching' },
+  ];
+
+  function show() {
+    _remove();
+
+    if (!document.getElementById('rp-style')) {
+      const s = document.createElement('style');
+      s.id = 'rp-style';
+      s.textContent = `
+        @keyframes rp-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.18);opacity:0.65}}
+        @keyframes rp-scan{0%{transform:translateY(-100%)}100%{transform:translateY(350%)}}
+        @keyframes rp-bar-shine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+      `;
+      document.head.appendChild(s);
+    }
+
+    _overlay = document.createElement('div');
+    _overlay.style.cssText =
+      'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.88);' +
+      'display:flex;align-items:center;justify-content:center;' +
+      '-webkit-tap-highlight-color:transparent;';
+
+    const card = document.createElement('div');
+    card.style.cssText =
+      'background:#16171c;border-radius:24px;padding:32px 26px 26px;width:288px;' +
+      'display:flex;flex-direction:column;align-items:center;gap:18px;' +
+      'box-shadow:0 24px 64px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.07);';
+
+    // ── Scanning icon ───────────────────────────────────────────────────────
+    const iconWrap = document.createElement('div');
+    iconWrap.style.cssText = 'position:relative;width:72px;height:72px;';
+
+    const iconCircle = document.createElement('div');
+    iconCircle.style.cssText =
+      'width:72px;height:72px;border-radius:50%;' +
+      'background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.2));' +
+      'border:2px solid rgba(59,130,246,0.4);' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'font-size:32px;animation:rp-pulse 2s ease-in-out infinite;overflow:hidden;';
+
+    const scanLine = document.createElement('div');
+    scanLine.style.cssText =
+      'position:absolute;left:0;right:0;height:2px;' +
+      'background:linear-gradient(90deg,transparent,rgba(59,130,246,0.9),transparent);' +
+      'animation:rp-scan 1.8s linear infinite;top:0;';
+
+    iconCircle.textContent = '📷';
+    iconCircle.appendChild(scanLine);
+    iconWrap.appendChild(iconCircle);
+
+    // ── Title ───────────────────────────────────────────────────────────────
+    const title = document.createElement('div');
+    title.textContent = 'Scanning photo';
+    title.style.cssText = 'font:700 17px/1 system-ui;color:#fff;letter-spacing:-0.01em;';
+
+    // ── Progress bar ────────────────────────────────────────────────────────
+    const barTrack = document.createElement('div');
+    barTrack.style.cssText =
+      'width:100%;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;';
+    _bar = document.createElement('div');
+    _bar.style.cssText =
+      'height:100%;width:0%;border-radius:3px;transition:width 0.5s cubic-bezier(.4,0,.2,1);' +
+      'background:linear-gradient(90deg,#3b82f6,#8b5cf6,#3b82f6);' +
+      'background-size:200% 100%;animation:rp-bar-shine 2s linear infinite;';
+    barTrack.appendChild(_bar);
+
+    // ── Steps ───────────────────────────────────────────────────────────────
+    const stepsWrap = document.createElement('div');
+    stepsWrap.style.cssText = 'width:100%;display:flex;flex-direction:column;gap:10px;';
+    _stepEls = {};
+    for (const s of STEPS) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;';
+
+      const dot = document.createElement('div');
+      dot.style.cssText =
+        'width:9px;height:9px;border-radius:50%;flex-shrink:0;' +
+        'background:rgba(255,255,255,0.12);transition:background 0.4s,box-shadow 0.4s;';
+
+      const lbl = document.createElement('div');
+      lbl.textContent = s.label;
+      lbl.style.cssText =
+        'font:13px/1 system-ui;color:rgba(255,255,255,0.3);transition:color 0.4s,font-weight 0.4s;';
+
+      row.appendChild(dot); row.appendChild(lbl);
+      stepsWrap.appendChild(row);
+      _stepEls[s.id] = { dot, lbl };
+    }
+
+    // ── Live message ────────────────────────────────────────────────────────
+    _msgEl = document.createElement('div');
+    _msgEl.style.cssText =
+      'font:12px/1.4 system-ui;color:rgba(255,255,255,0.35);text-align:center;min-height:15px;';
+
+    card.appendChild(iconWrap);
+    card.appendChild(title);
+    card.appendChild(barTrack);
+    card.appendChild(stepsWrap);
+    card.appendChild(_msgEl);
+    _overlay.appendChild(card);
+    document.body.appendChild(_overlay);
+
+    _setStep('load', 5);
+  }
+
+  function _setStep(activeId, pct) {
+    if (_bar) _bar.style.width = pct + '%';
+    let passed = false;
+    for (const s of STEPS) {
+      const el = _stepEls[s.id];
+      if (!el) continue;
+      if (passed) {
+        el.dot.style.background = 'rgba(255,255,255,0.12)';
+        el.dot.style.boxShadow = '';
+        el.lbl.style.color = 'rgba(255,255,255,0.3)';
+        el.lbl.style.fontWeight = '400';
+      } else if (s.id === activeId) {
+        el.dot.style.background = '#3b82f6';
+        el.dot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
+        el.lbl.style.color = '#fff';
+        el.lbl.style.fontWeight = '700';
+        passed = true;
+      } else {
+        el.dot.style.background = '#22c55e';
+        el.dot.style.boxShadow = '0 0 6px rgba(34,197,94,0.5)';
+        el.lbl.style.color = 'rgba(255,255,255,0.55)';
+        el.lbl.style.fontWeight = '400';
+      }
+    }
+  }
+
+  function update(stepId, pct, msg) {
+    if (!_overlay) return;
+    _setStep(stepId, pct);
+    if (_msgEl) _msgEl.textContent = msg || '';
+  }
+
+  function _remove() {
+    if (_overlay && _overlay.parentNode) _overlay.parentNode.removeChild(_overlay);
+    _overlay = null; _bar = null; _msgEl = null; _stepEls = {};
+  }
+
+  return { show, update, hide: _remove };
+})();
+
 // ── RecognizeModal ────────────────────────────────────────────────────────────
 
 const RecognizeModal = (() => {
@@ -504,7 +658,7 @@ els.recognizeFile.addEventListener('change', async (e) => {
   e.target.value = '';
   if (!file) return;
 
-  showToast('Analyzing faces\u2026');
+  RecognizeProgress.show();
 
   try {
     const allDescriptors = await PhotoDB.getAllDescriptorsNormalized();
@@ -512,8 +666,11 @@ els.recognizeFile.addEventListener('change', async (e) => {
     // Backfill: extract descriptors for people who have a photo but no descriptor yet
     const needsBackfill = people.filter(p => photoCache[p.id] && !allDescriptors[p.id]);
     if (needsBackfill.length) {
-      showToast(`Learning ${needsBackfill.length} face${needsBackfill.length !== 1 ? 's' : ''}\u2026`);
-      for (const p of needsBackfill) {
+      RecognizeProgress.update('load', 10, `Learning ${needsBackfill.length} face${needsBackfill.length !== 1 ? 's' : ''} from your database\u2026`);
+      for (let i = 0; i < needsBackfill.length; i++) {
+        const p = needsBackfill[i];
+        RecognizeProgress.update('load', 10 + Math.round((i / needsBackfill.length) * 20),
+          `Learning ${p.short}\u2026`);
         try {
           const desc = await FaceEngine.extractDescriptor(photoCache[p.id]);
           if (desc) {
@@ -524,7 +681,6 @@ els.recognizeFile.addEventListener('change', async (e) => {
           console.warn('Descriptor backfill failed for', p.id, ex);
         }
       }
-      showToast('Analyzing faces\u2026');
     }
 
     const peopleWithDesc = people
@@ -532,11 +688,26 @@ els.recognizeFile.addEventListener('change', async (e) => {
       .filter(p => p.descriptors && p.descriptors.length);
 
     if (!peopleWithDesc.length) {
+      RecognizeProgress.hide();
       showToast('No face data yet \u2014 add photos to people in Options first.');
       return;
     }
 
-    const results = await FaceEngine.recognizeGroup(file, peopleWithDesc);
+    let detectedCount = 0;
+    const results = await FaceEngine.recognizeGroup(file, peopleWithDesc, msg => {
+      if (msg.startsWith('Loading')) {
+        RecognizeProgress.update('load', 30, msg);
+      } else if (msg.startsWith('Detecting')) {
+        RecognizeProgress.update('detect', 55, msg);
+      } else if (msg.startsWith('Matching')) {
+        detectedCount = parseInt(msg) || 0;
+        RecognizeProgress.update('match', 80, msg);
+      } else if (msg === 'Done') {
+        RecognizeProgress.update('match', 100, '');
+      }
+    });
+
+    RecognizeProgress.hide();
 
     if (!results.length) {
       showToast('No faces detected in this photo.');
@@ -545,6 +716,7 @@ els.recognizeFile.addEventListener('change', async (e) => {
 
     RecognizeModal.open(results, people);
   } catch (err) {
+    RecognizeProgress.hide();
     console.error(err);
     showToast('Recognition failed: ' + err.message);
   }
