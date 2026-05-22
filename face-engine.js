@@ -135,12 +135,12 @@ const FaceEngine = (() => {
     });
     URL.revokeObjectURL(objectUrl);
 
-    // Resize to max 1200px wide
-    const canvas = _resizeToCanvas(img, 1200);
+    // Resize to max 1800px wide (keeps faces large enough for detection)
+    const canvas = _resizeToCanvas(img, 1800);
 
     progress('Detecting faces…');
 
-    const options = new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.35, inputSize: 416 });
+    const options = new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.2, inputSize: 608 });
     const detections = await faceapi
       .detectAllFaces(canvas, options)
       .withFaceLandmarks(true)
