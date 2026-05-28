@@ -192,12 +192,12 @@ async function saveLocal() {
 async function saveAll() {
   await saveLocal();
 
-  if (!GithubSync.canWrite()) return;
-
-  // Mark pending BEFORE the await so that if the user navigates away
-  // mid-save, the builder's background GitHub fetch won't overwrite
-  // localStorage with stale remote data that doesn't have the new entry.
+  // Mark local as ahead of GitHub regardless of whether we can write.
+  // Without this, the builder's background GitHub fetch would overwrite
+  // localStorage with stale remote data when there's no write token.
   localStorage.setItem('gh_pending_save', '1');
+
+  if (!GithubSync.canWrite()) return;
   setSyncState("syncing", "Saving…");
   try {
     const allPhotos = await PhotoDB.getAll();
