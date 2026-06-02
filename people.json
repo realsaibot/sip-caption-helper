@@ -1,5 +1,12 @@
 [
   {
+    "id": "luc-frieden",
+    "short": "Luc frieden",
+    "full": "Premier ministre, Luc Frieden",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
     "id": "carlos-ramiro-martinez",
     "short": "Carlos Ramiro MARTINEZ",
     "full": "Carlos Ramiro Martinez, Ministre des Relations extérieures de la République du Guatemala",
@@ -613,13 +620,6 @@
     "short": "Maria Malmer Stenergard",
     "full": "Ministre des Affaires étrangères de la Suède, Maria Malmer Stenergard",
     "category": "Suède",
-    "photo": ""
-  },
-  {
-    "id": "lambour",
-    "short": "José Gabriel LAMBOUR PEÑALONZO",
-    "full": "Ambassadeur extraordinaire et plénipotentiaire de la République du Guatemala accrédité au Grand-Duché de Luxembourg, José Gabriel LAMBOUR PEÑALONZO",
-    "category": "Guatemala",
     "photo": ""
   }
 ]
