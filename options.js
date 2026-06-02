@@ -154,7 +154,9 @@ async function load() {
     setSyncState("syncing", "Fetching from GitHub…");
     try {
       const remote = await GithubSync.load();
-      if (remote !== null && localStorage.getItem('gh_pending_save') !== '1') {
+      const _recentSave = parseInt(localStorage.getItem('gh_saved_at') || '0');
+      const _cdnGrace = (Date.now() - _recentSave) < 90_000;
+      if (remote !== null && localStorage.getItem('gh_pending_save') !== '1' && !_cdnGrace) {
         // Only overwrite local if there's no unsaved local changes pending
         const photoMap = {};
         const cleanedRemote = remote.map(x => {
@@ -203,6 +205,7 @@ async function saveAll() {
     const allPhotos = await PhotoDB.getAll();
     await GithubSync.save(people, allPhotos);
     localStorage.removeItem('gh_pending_save');
+    localStorage.setItem('gh_saved_at', String(Date.now()));
     setSyncState("ok", "Saved to GitHub ✓");
   } catch (e) {
     setSyncState("error", `GitHub save failed — saved locally (${e.message})`);

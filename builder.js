@@ -157,9 +157,12 @@ async function loadData() {
       .then(async remote => {
         if (!remote) return;
 
-        // If local data hasn't synced to GitHub yet, don't overwrite it
-        if (localStorage.getItem('gh_pending_save') === '1') {
-          console.info('Skipping GitHub overwrite — local has unsaved changes.');
+        // If local data hasn't synced to GitHub yet, don't overwrite it.
+        // Also skip if a save just succeeded — raw CDN can lag 30-120s behind the API.
+        const _recentSave = parseInt(localStorage.getItem('gh_saved_at') || '0');
+        const _cdnGrace = (Date.now() - _recentSave) < 90_000;
+        if (localStorage.getItem('gh_pending_save') === '1' || _cdnGrace) {
+          console.info('Skipping GitHub overwrite — local changes or CDN grace period.');
           return;
         }
 
