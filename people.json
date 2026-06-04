@@ -628,5 +628,12 @@
     "full": "Ambassadeur extraordinaire et plénipotentiaire de la République du Guatemala accrédité au Grand-Duché de Luxembourg, José Gabriel LAMBOUR PEÑALONZO",
     "category": "Guatemala",
     "photo": ""
+  },
+  {
+    "id": "mcgrath",
+    "short": "Michael McGrath",
+    "full": "Commissaire européen pour la Démocratie, la Justice, l'État de droit et la Protection des consommateurs, Michael McGrath",
+    "category": "Commission européenne",
+    "photo": ""
   }
 ]
