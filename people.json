@@ -649,5 +649,19 @@
     "full": "Président d'honneur de Publicis Groupe, Maurice Lévy",
     "category": "France",
     "photo": ""
+  },
+  {
+    "id": "yvette-cooper",
+    "short": "Yvette Cooper",
+    "full": "Ministre des Affaires étrangères, du Commonwealth et du Développement, Yvette Cooper",
+    "category": "England",
+    "photo": ""
+  },
+  {
+    "id": "nick-thomas-symonds",
+    "short": "Nick Thomas-Symonds",
+    "full": "Ministre chargé de la Constitution et des Relations avec l'Union européenne, Nick Thomas-Symonds",
+    "category": "England",
+    "photo": ""
   }
 ]
