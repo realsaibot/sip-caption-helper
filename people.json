@@ -663,5 +663,33 @@
     "full": "Ministre chargé de la Constitution et des Relations avec l'Union européenne, Nick Thomas-Symonds",
     "category": "England",
     "photo": ""
+  },
+  {
+    "id": "nassar",
+    "short": "Adel Nassar",
+    "full": "Ministre de la Justice du Liban, Adel Nassar",
+    "category": "Liban",
+    "photo": ""
+  },
+  {
+    "id": "mushikiwabo",
+    "short": "Louise Mushikiwabo",
+    "full": "Secrétaire générale de l'Organisation internationale de la Francophonie, Louise Mushikiwabo",
+    "category": "Francophonie",
+    "photo": ""
+  },
+  {
+    "id": "turk",
+    "short": "Volker Türk",
+    "full": "Haut-Commissaire des Nations Unies aux droits de l'homme, Volker Türk",
+    "category": "Nations Unies",
+    "photo": ""
+  },
+  {
+    "id": "berset",
+    "short": "Alain Berset",
+    "full": "Secrétaire général du Conseil de l'Europe, Alain Berset",
+    "category": "Conseil de l'Europe",
+    "photo": ""
   }
 ]
