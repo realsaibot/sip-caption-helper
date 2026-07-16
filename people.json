@@ -705,5 +705,19 @@
     "full": "Ministre déléguée auprès du ministre de l'Europe et des Affaires étrangères, chargée de la Francophonie, des Partenariats internationaux et des Français de l'étranger, Éléonore Caroit",
     "category": "France",
     "photo": ""
+  },
+  {
+    "id": "dussey",
+    "short": "Robert Dussey",
+    "full": "Ministre des Affaires étrangères, de la Coopération, de l'Intégration africaine et des Togolais de l'extérieur, Robert Dussey",
+    "category": "Togo",
+    "photo": ""
+  },
+  {
+    "id": "lawson",
+    "short": "Cina Lawson",
+    "full": "Ministre de l'Efficacité du service public et de la Transformation numérique, Cina Lawson",
+    "category": "Togo",
+    "photo": ""
   }
 ]
