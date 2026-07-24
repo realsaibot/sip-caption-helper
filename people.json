@@ -121,7 +121,7 @@
   {
     "id": "lutz-kunack",
     "short": "Lutz Kunack",
-    "full": "Lutz Kunack, consul honoraire avec juridiction sur le territoire des Philippines",
+    "full": "Consul général aux Philippines, Lutz Kunack",
     "category": "Philippines",
     "photo": ""
   },
@@ -149,14 +149,14 @@
   {
     "id": "leesch",
     "short": "Michel Leesch",
-    "full": "Michel Leesch, ambassadeur du Luxembourg aux Philippines",
+    "full": "Ambassadeur du Luxembourg, Michel Leesch",
     "category": "Luxembourg",
     "photo": ""
   },
   {
     "id": "ferring",
     "short": "Pierre Ferring",
-    "full": "Pierre Ferring, directeur général de la Promotion du commerce extérieur et des investissements",
+    "full": "Ambassadeur, Directeur général de la Promotion du commerce extérieur et des investissements, Pierre Ferring",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -170,14 +170,14 @@
   {
     "id": "dockendorf",
     "short": "Véronique Dockendorf",
-    "full": "Véronique Dockendorf, directrice des Affaires politiques",
+    "full": "Directrice des Affaires politiques, Véronique Dockendorf",
     "category": "Luxembourg",
     "photo": ""
   },
   {
     "id": "moes",
     "short": "Anne Moes",
-    "full": "Anne Moes, cheffe de mission adjointe",
+    "full": "Cheffe de mission adjointe, Anne Moes",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -718,6 +718,34 @@
     "short": "Cina Lawson",
     "full": "Cina Lawson, ministre de l'Efficacité du service public et de la Transformation numérique",
     "category": "Togo",
+    "photo": ""
+  },
+  {
+    "id": "roque",
+    "short": "Cristina Roque",
+    "full": "Secrétaire du Commerce et de l'Industrie, Cristina Roque",
+    "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "le-hoai-trung",
+    "short": "Lê Hoài Trung",
+    "full": "Ministre des Affaires étrangères du Vietnam, Lê Hoài Trung",
+    "category": "Vietnam",
+    "photo": ""
+  },
+  {
+    "id": "hemmer",
+    "short": "Patrick Hemmer",
+    "full": "Ambassadeur du Grand-Duché de Luxembourg auprès de l'ASEAN, Patrick Hemmer",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "nesser",
+    "short": "Charel Nesser",
+    "full": "Secrétaire de Légation, Attaché de presse du Vice-Premier Ministre, Charel Nesser",
+    "category": "Luxembourg",
     "photo": ""
   }
 ]
