@@ -747,5 +747,33 @@
     "full": "Charel Nesser, Secrétaire de Légation, Attaché de presse du Vice-Premier Ministre",
     "category": "Luxembourg",
     "photo": ""
+  },
+  {
+    "id": "herrera-lim",
+    "short": "Leo Herrera-Lim",
+    "full": "Leo Herrera-Lim, Sous-secrétaire d'État aux Affaires étrangères chargé de la politique étrangère",
+    "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "amatong",
+    "short": "Deena Amatong",
+    "full": "Deena Amatong, Secrétaire adjointe chargée des affaires européennes",
+    "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "flores",
+    "short": "Ferdinand Flores",
+    "full": "Ferdinand Flores, Directeur de la Division pour l'Europe du Nord et de l'Ouest",
+    "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "chua",
+    "short": "Dominic Chua",
+    "full": "Dominic Chua, Directeur adjoint de la Division pour l'Europe du Nord et de l'Ouest",
+    "category": "Philippines",
+    "photo": ""
   }
 ]
