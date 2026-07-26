@@ -191,7 +191,7 @@
   {
     "id": "siebenaler",
     "short": "Anne Siebenaler",
-    "full": "Anne Siebenaler, Attachée de Légation, Desk D8",
+    "full": "Anne Siebenaler, Attachée de Légation, Direction de la Promotion du commerce extérieur et des investissements",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -737,14 +737,14 @@
   {
     "id": "hemmer",
     "short": "Patrick Hemmer",
-    "full": "Patrick Hemmer, Ambassadeur du Grand-Duché de Luxembourg auprès de l'ASEAN",
+    "full": "Patrick Hemmer, Ambassadeur du Luxembourg à Singapour",
     "category": "Luxembourg",
     "photo": ""
   },
   {
     "id": "nesser",
     "short": "Charel Nesser",
-    "full": "Charel Nesser, Secrétaire de Légation, Attaché de presse du Vice-Premier Ministre",
+    "full": "Charel Nesser, Attaché de presse du Ministre",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -774,6 +774,34 @@
     "short": "Vivian Balakrishnan",
     "full": "Dr Vivian Balakrishnan, Ministre des Affaires étrangères",
     "category": "Singapour",
+    "photo": ""
+  },
+  {
+    "id": "koener",
+    "short": "Steven Koener",
+    "full": "Steven Koener, Chargé d'Affaires a.i. du Luxembourg à Singapour",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "renevier",
+    "short": "Cassandre Renevier",
+    "full": "Cassandre Renevier, Conseillère",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "andrzejewski",
+    "short": "Tobias Andrzejewski",
+    "full": "Tobias Andrzejewski, Chargé de la communication digitale / Photographe",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "gira",
+    "short": "Mike Gira",
+    "full": "Mike Gira, Officier de sécurité du Ministre",
+    "category": "Luxembourg",
     "photo": ""
   }
 ]
