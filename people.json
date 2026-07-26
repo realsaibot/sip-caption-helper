@@ -191,7 +191,7 @@
   {
     "id": "siebenaler",
     "short": "Anne Siebenaler",
-    "full": "Anne Siebenaler, attachée de Légation, Desk D8",
+    "full": "Anne Siebenaler, Attachée de Légation, Desk D8",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -753,6 +753,27 @@
     "short": "Fidelis Herrera-Lim",
     "full": "Fidelis Herrera-Lim, Épouse de M. Leo Herrera-Lim",
     "category": "Philippines",
+    "photo": ""
+  },
+  {
+    "id": "lee-hsien-loong",
+    "short": "Lee Hsien Loong",
+    "full": "Lee Hsien Loong, Ministre senior",
+    "category": "Singapour",
+    "photo": ""
+  },
+  {
+    "id": "liem",
+    "short": "Michelle Liem",
+    "full": "Michelle Liem, Consule honoraire émérite",
+    "category": "Singapour",
+    "photo": ""
+  },
+  {
+    "id": "balakrishnan",
+    "short": "Vivian Balakrishnan",
+    "full": "Dr Vivian Balakrishnan, Ministre des Affaires étrangères",
+    "category": "Singapour",
     "photo": ""
   }
 ]
