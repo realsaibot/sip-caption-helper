@@ -184,7 +184,7 @@
   {
     "id": "poveromo",
     "short": "Luc Poveromo",
-    "full": "Luc Poveromo, secrétaire de Légation, attaché de presse du Vice-Premier ministre",
+    "full": "Luc Poveromo, Attaché de presse du Vice-Premier Ministre",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -802,6 +802,62 @@
     "short": "Mike Gira",
     "full": "Mike Gira, Officier de sécurité du Ministre",
     "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "hubsch",
+    "short": "Marc Hübsch",
+    "full": "Marc Hübsch, Ambassadeur non-résident au Monténégro",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "da-cruz",
+    "short": "Angèle Da Cruz",
+    "full": "Angèle Da Cruz, Ambassadrice, Directrice des Affaires européennes et des Relations économiques internationales",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "injac",
+    "short": "Olivera Injac",
+    "full": "Olivera Injac, Ambassadrice du Monténégro auprès du Grand-Duché de Luxembourg",
+    "category": "Monténégro",
+    "photo": ""
+  },
+  {
+    "id": "ibrahimovic",
+    "short": "Ervin Ibrahimović",
+    "full": "Ervin Ibrahimović, Ministre des Affaires étrangères du Monténégro",
+    "category": "Monténégro",
+    "photo": ""
+  },
+  {
+    "id": "gorcevic",
+    "short": "Maida Gorčević",
+    "full": "Maida Gorčević, Ministre des Affaires européennes du Monténégro",
+    "category": "Monténégro",
+    "photo": ""
+  },
+  {
+    "id": "ivanovic",
+    "short": "Filip Ivanović",
+    "full": "Filip Ivanović, Vice-Premier Ministre du Gouvernement du Monténégro chargé des Affaires étrangères et européennes",
+    "category": "Monténégro",
+    "photo": ""
+  },
+  {
+    "id": "milatovic",
+    "short": "Jakov Milatović",
+    "full": "Jakov Milatović, Président du Monténégro",
+    "category": "Monténégro",
+    "photo": ""
+  },
+  {
+    "id": "spajic",
+    "short": "Milojko Spajić",
+    "full": "Milojko Spajić, Premier Ministre du Monténégro",
+    "category": "Monténégro",
     "photo": ""
   }
 ]
