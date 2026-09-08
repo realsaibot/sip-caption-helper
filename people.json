@@ -533,9 +533,9 @@
   },
   {
     "id": "jaishankar",
-    "short": "Subrahmanyam Jaishankar",
-    "full": "Subrahmanyam Jaishankar, ministre des Affaires étrangères de l'Inde",
-    "category": "Inde",
+    "short": "Dr Subrahmanyam Jaishankar",
+    "full": "Dr Subrahmanyam Jaishankar, Ministre des Affaires extérieures",
+    "category": "India",
     "photo": ""
   },
   {
@@ -865,6 +865,20 @@
     "short": "Diène Keita",
     "full": "Diène Keita, Directrice exécutive du FNUAP",
     "category": "UN",
+    "photo": ""
+  },
+  {
+    "id": "goyal",
+    "short": "Piyush Goyal",
+    "full": "Piyush Goyal, Ministre du Commerce et de l'Industrie",
+    "category": "India",
+    "photo": ""
+  },
+  {
+    "id": "delles",
+    "short": "Lex Delles",
+    "full": "Lex Delles, Ministre de l'Économie, des PME, de l'Énergie et du Tourisme",
+    "category": "Luxembourg",
     "photo": ""
   }
 ]
