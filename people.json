@@ -887,5 +887,54 @@
     "full": "Adel Al-Saleh, Directeur général de SES",
     "category": "SES",
     "photo": ""
+  },
+  {
+    "id": "tom-fletcher",
+    "short": "Tom Fletcher",
+    "full": "Tom Fletcher, Secrétaire général adjoint aux Affaires humanitaires et Coordonnateur des secours d'urgence",
+    "category": "UN",
+    "photo": ""
+  },
+  {
+    "id": "tovar-rivera",
+    "short": "Manuel Tovar Rivera",
+    "full": "S.E.M. Manuel Tovar Rivera, Ministre des Affaires étrangères du Costa Rica",
+    "category": "Costa Rica",
+    "photo": ""
+  },
+  {
+    "id": "chapagain",
+    "short": "Jagan Chapagain",
+    "full": "Jagan Chapagain, Secrétaire général de la Fédération internationale des Sociétés de la Croix-Rouge et du Croissant-Rouge (FICR)",
+    "category": "FICR",
+    "photo": ""
+  },
+  {
+    "id": "guterres",
+    "short": "António Guterres",
+    "full": "S.E.M. António Guterres, Secrétaire général des Nations Unies",
+    "category": "UN",
+    "photo": ""
+  },
+  {
+    "id": "abdullah-ii",
+    "short": "Roi Abdullah II",
+    "full": "S.A.R. Roi Abdullah II ibn Al Hussein, Roi de Jordanie",
+    "category": "Jordanie",
+    "photo": ""
+  },
+  {
+    "id": "sikela",
+    "short": "Jozef Síkela",
+    "full": "Jozef Síkela, Commissaire européen aux Partenariats internationaux",
+    "category": "European Commission",
+    "photo": ""
+  },
+  {
+    "id": "calvino",
+    "short": "Nadia Calviño",
+    "full": "Nadia Calviño, Présidente de la Banque européenne d'investissement (BEI)",
+    "category": "BEI",
+    "photo": ""
   }
 ]
