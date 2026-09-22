@@ -324,7 +324,7 @@
   {
     "id": "skau",
     "short": "Carl Skau",
-    "full": "Carl Skau, directeur exécutif adjoint et chef des opérations du Programme alimentaire mondial",
+    "full": "Carl Skau, Directeur exécutif par intérim et Directeur exécutif adjoint du PAM",
     "category": "PAM",
     "photo": ""
   },
@@ -935,6 +935,13 @@
     "short": "Nadia Calviño",
     "full": "Nadia Calviño, Présidente de la Banque européenne d'investissement (BEI)",
     "category": "BEI",
+    "photo": ""
+  },
+  {
+    "id": "leis-garcia",
+    "short": "Antón Leis García",
+    "full": "Antón Leis García, Haut-Commissaire assistant chargé des opérations du HCR",
+    "category": "HCR",
     "photo": ""
   }
 ]
