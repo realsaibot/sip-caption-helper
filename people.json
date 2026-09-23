@@ -950,5 +950,12 @@
     "full": "Volodymyr Zelensky, Président de l'Ukraine",
     "category": "Ukraine",
     "photo": ""
+  },
+  {
+    "id": "macron",
+    "short": "Emmanuel Macron",
+    "full": "Emmanuel Macron, Président de la République française",
+    "category": "France",
+    "photo": ""
   }
 ]
