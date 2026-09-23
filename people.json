@@ -952,10 +952,24 @@
     "photo": ""
   },
   {
-    "id": "macron",
-    "short": "Emmanuel Macron",
-    "full": "Emmanuel Macron, Président de la République française",
-    "category": "France",
+    "id": "attaf",
+    "short": "Ahmed Attaf",
+    "full": "S.E.M. Ahmed Attaf, Ministre d'État, Ministre des Affaires étrangères, de la Communauté nationale à l'étranger et des Affaires africaines de l'Algérie",
+    "category": "Algérie",
+    "photo": ""
+  },
+  {
+    "id": "khurelsukh",
+    "short": "Ukhnaa Khurelsukh",
+    "full": "S.E.M. Ukhnaa Khurelsukh, Président de la Mongolie",
+    "category": "Mongolie",
+    "photo": ""
+  },
+  {
+    "id": "ablakwa",
+    "short": "Samuel Okudzeto Ablakwa",
+    "full": "S.E.M. Samuel Okudzeto Ablakwa, Ministre des Affaires étrangères du Ghana",
+    "category": "Ghana",
     "photo": ""
   }
 ]
