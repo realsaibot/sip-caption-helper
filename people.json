@@ -1062,5 +1062,19 @@
     "full": "Gauthier Destenay, Époux du Ministre",
     "category": "Luxembourg",
     "photo": ""
+  },
+  {
+    "id": "tor-faus",
+    "short": "Imma Tor Faus",
+    "full": "Imma Tor Faus, Ministre des Affaires étrangères d'Andorre",
+    "category": "Andorre",
+    "photo": ""
+  },
+  {
+    "id": "espot-zamora",
+    "short": "Xavier Espot Zamora",
+    "full": "Xavier Espot Zamora, Chef du Gouvernement d'Andorre",
+    "category": "Andorre",
+    "photo": ""
   }
 ]
