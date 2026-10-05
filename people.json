@@ -1020,5 +1020,47 @@
     "full": "Chris Fearne, Ministre des Affaires étrangères et européennes de Malte",
     "category": "Malte",
     "photo": ""
+  },
+  {
+    "id": "cano",
+    "short": "Gemma Cano",
+    "full": "Gemma Cano, Cheffe du protocole d'Andorre",
+    "category": "Andorre",
+    "photo": ""
+  },
+  {
+    "id": "mateu",
+    "short": "Vicenç Mateu",
+    "full": "Vicenç Mateu, Ambassadeur d'Andorre au Luxembourg",
+    "category": "Andorre",
+    "photo": ""
+  },
+  {
+    "id": "ubach-font",
+    "short": "Maria Ubach Font",
+    "full": "Maria Ubach Font, Conseillère diplomatique du Chef du Gouvernement d'Andorre",
+    "category": "Andorre",
+    "photo": ""
+  },
+  {
+    "id": "riba",
+    "short": "Landry Riba",
+    "full": "Landry Riba, Secrétaire d'État aux Affaires européennes d'Andorre",
+    "category": "Andorre",
+    "photo": ""
+  },
+  {
+    "id": "cardoso",
+    "short": "Elisabeth Cardoso",
+    "full": "Elisabeth Cardoso, Ambassadrice du Grand-Duché de Luxembourg en Principauté d'Andorre",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "destenay",
+    "short": "Gauthier Destenay",
+    "full": "Gauthier Destenay, Époux du Ministre",
+    "category": "Luxembourg",
+    "photo": ""
   }
 ]
