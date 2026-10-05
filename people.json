@@ -1076,5 +1076,19 @@
     "full": "Xavier Espot Zamora, Chef du Gouvernement d'Andorre",
     "category": "Andorre",
     "photo": ""
+  },
+  {
+    "id": "lopez",
+    "short": "Maira Lopez",
+    "full": "Maira Lopez, Directrice des Affaires bilatérales du Ministère des Affaires étrangères d'Andorre",
+    "category": "Andorre",
+    "photo": ""
+  },
+  {
+    "id": "lucendo",
+    "short": "Claudia Lucendo",
+    "full": "Claudia Lucendo, Troisième secrétaire",
+    "category": "Andorre",
+    "photo": ""
   }
 ]
