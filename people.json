@@ -1090,5 +1090,26 @@
     "full": "Claudia Lucendo, Troisième secrétaire",
     "category": "Andorre",
     "photo": ""
+  },
+  {
+    "id": "amante-da-rosa",
+    "short": "Manuel Augusto Lima Amante da Rosa",
+    "full": "Manuel Augusto Lima Amante da Rosa, Ministre des Affaires étrangères, des Communautés et de la Défense nationale de la République du Cabo Verde",
+    "category": "Cabo Verde",
+    "photo": ""
+  },
+  {
+    "id": "ramos-varela",
+    "short": "Carlos Alberto Ramos Varela",
+    "full": "Carlos Alberto Ramos Varela, Ministre de l'Environnement, de l'Action climatique et de l'Énergie de la République du Cabo Verde",
+    "category": "Cabo Verde",
+    "photo": ""
+  },
+  {
+    "id": "wilmes",
+    "short": "Serge Wilmes",
+    "full": "Serge Wilmes, Ministre de l'Environnement, du Climat et de la Biodiversité",
+    "category": "Luxembourg",
+    "photo": ""
   }
 ]
