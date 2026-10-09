@@ -702,7 +702,7 @@
   {
     "id": "caroit",
     "short": "Éléonore Caroit",
-    "full": "Éléonore Caroit, ministre déléguée auprès du ministre de l'Europe et des Affaires étrangères, chargée de la Francophonie, des Partenariats internationaux et des Français de l'étranger",
+    "full": "Éléonore Caroit, Ministre déléguée auprès du ministre de l'Europe et des Affaires étrangères, chargée de la Francophonie, des Partenariats internationaux et des Français de l'étranger",
     "category": "France",
     "photo": ""
   },
@@ -1110,6 +1110,13 @@
     "short": "Serge Wilmes",
     "full": "Serge Wilmes, Ministre de l'Environnement, du Climat et de la Biodiversité",
     "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "richmond",
+    "short": "Neale Richmond",
+    "full": "Neale Richmond, Ministre d'État chargé du Développement international et de la Diaspora de l'Irlande",
+    "category": "Irlande",
     "photo": ""
   }
 ]
