@@ -562,7 +562,7 @@
   {
     "id": "budrys",
     "short": "Kęstutis Budrys",
-    "full": "Kęstutis Budrys, ministre des Affaires étrangères de la République de Lituanie",
+    "full": "Kęstutis Budrys, Ministre des Affaires étrangères de la Lituanie",
     "category": "Lituanie",
     "photo": ""
   },
@@ -1138,6 +1138,20 @@
     "short": "Alain Germeaux",
     "full": "Alain Germeaux, Directeur des Affaires juridiques du Ministère des Affaires étrangères",
     "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "orban",
+    "short": "Anita Orbán",
+    "full": "Anita Orbán, Vice-Première ministre et Ministre des Affaires étrangères de la Hongrie",
+    "category": "Hongrie",
+    "photo": ""
+  },
+  {
+    "id": "petrova-chamova",
+    "short": "Velislava Petrova-Chamova",
+    "full": "Velislava Petrova-Chamova, Ministre des Affaires étrangères de la Bulgarie",
+    "category": "Bulgarie",
     "photo": ""
   }
 ]
