@@ -1118,5 +1118,26 @@
     "full": "Neale Richmond, Ministre d'État chargé du Développement international et de la Diaspora de l'Irlande",
     "category": "Irlande",
     "photo": ""
+  },
+  {
+    "id": "shum",
+    "short": "Iryna Shum",
+    "full": "Iryna Shum, Directrice adjointe du Département de la communication publique du Ministère des Affaires étrangères de l'Ukraine",
+    "category": "Ukraine",
+    "photo": ""
+  },
+  {
+    "id": "schumacher",
+    "short": "Henri Schumacher",
+    "full": "Henri Schumacher, Secrétaire général du Ministère des Affaires étrangères",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "germeaux",
+    "short": "Alain Germeaux",
+    "full": "Alain Germeaux, Directeur des Affaires juridiques du Ministère des Affaires étrangères",
+    "category": "Luxembourg",
+    "photo": ""
   }
 ]
