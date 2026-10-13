@@ -1153,5 +1153,26 @@
     "full": "Velislava Petrova-Chamova, Ministre des Affaires étrangères de la Bulgarie",
     "category": "Bulgarie",
     "photo": ""
+  },
+  {
+    "id": "gherasimov",
+    "short": "Cristina Gherasimov",
+    "full": "Cristina Gherasimov, Vice-Première ministre pour l'Intégration européenne de la République de Moldavie",
+    "category": "Moldavie",
+    "photo": ""
+  },
+  {
+    "id": "serafin",
+    "short": "Piotr Serafin",
+    "full": "Piotr Serafin, Commissaire européen au Budget, à la Lutte antifraude et à l'Administration publique",
+    "category": "European Commission",
+    "photo": ""
+  },
+  {
+    "id": "chatzivasileiou",
+    "short": "Tasos Chatzivasileiou",
+    "full": "Tasos Chatzivasileiou, Vice-ministre des Affaires étrangères chargé des Affaires européennes de la Grèce",
+    "category": "Grèce",
+    "photo": ""
   }
 ]
