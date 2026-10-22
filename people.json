@@ -1195,12 +1195,5 @@
     "full": "Lars-Hendrik Röller, Fondateur et Président du Berlin Global Dialogue (BGD)",
     "category": "Berlin Global Dialogue",
     "photo": ""
-  },
-  {
-    "id": "test-personne",
-    "short": "Test Personne",
-    "full": "Test Personne, personne fictive pour tester l'application",
-    "category": "Test",
-    "photo": ""
   }
 ]
