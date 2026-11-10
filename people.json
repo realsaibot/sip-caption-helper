@@ -184,7 +184,7 @@
   {
     "id": "poveromo",
     "short": "Luc Poveromo",
-    "full": "Luc Poveromo, Attaché de presse du Vice-Premier Ministre",
+    "full": "Luc Poveromo, Secrétaire de Légation, Porte-parole du Vice-Premier ministre",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -1201,6 +1201,34 @@
     "short": "Jenny zu Eulenburg",
     "full": "Jenny zu Eulenburg, directrice générale du Berlin Global Dialogue (BGD)",
     "category": "Berlin Global Dialogue",
+    "photo": ""
+  },
+  {
+    "id": "ternes",
+    "short": "Georges Ternes",
+    "full": "Georges Ternes, Ambassadeur, Directeur de la Coopération au développement et de l’action humanitaire",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "huberty",
+    "short": "Laure Huberty",
+    "full": "Laure Huberty, Ambassadrice du Luxembourg à Dakar et au Burkina Faso",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "lemaire",
+    "short": "Maximilien Lemaire",
+    "full": "Maximilien Lemaire, Consul honoraire du Luxembourg à Abidjan",
+    "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "bisenius",
+    "short": "Martine Bisenius",
+    "full": "Martine Bisenius, Conseillère commerce et investissements, Direction de la Promotion du commerce extérieur et des investissements",
+    "category": "Luxembourg",
     "photo": ""
   }
 ]
