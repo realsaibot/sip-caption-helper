@@ -1213,7 +1213,7 @@
   {
     "id": "huberty",
     "short": "Laure Huberty",
-    "full": "Laure Huberty, Ambassadrice du Luxembourg à Dakar et au Burkina Faso",
+    "full": "Laure Huberty, Ambassadrice du Luxembourg à Dakar et au Burkina Faso, accréditation en Côte d’Ivoire en cours",
     "category": "Luxembourg",
     "photo": ""
   },
@@ -1227,8 +1227,50 @@
   {
     "id": "bisenius",
     "short": "Martine Bisenius",
-    "full": "Martine Bisenius, Conseillère commerce et investissements, Direction de la Promotion du commerce extérieur et des investissements",
+    "full": "Martine Bisenius, Trade and Investment Advisor, Direction de la Promotion du commerce extérieur et des investissements",
     "category": "Luxembourg",
+    "photo": ""
+  },
+  {
+    "id": "kaba",
+    "short": "Nialé Kaba",
+    "full": "Nialé Kaba, ministre d'État, ministre des Affaires étrangères et de la Coopération internationale",
+    "category": "Côte d'Ivoire",
+    "photo": ""
+  },
+  {
+    "id": "konate",
+    "short": "Kalil Konaté",
+    "full": "Kalil Konaté, ministre du Commerce, de l’Industrie et de l’Artisanat",
+    "category": "Côte d'Ivoire",
+    "photo": ""
+  },
+  {
+    "id": "ouattara",
+    "short": "Téné Birahima Ouattara",
+    "full": "Téné Birahima Ouattara, Vice-Premier ministre, ministre de la Défense",
+    "category": "Côte d'Ivoire",
+    "photo": ""
+  },
+  {
+    "id": "bengaly",
+    "short": "Massah Bengaly",
+    "full": "Massah Bengaly, DG de Petro-Sea Logistics, filiale de Sea Invest",
+    "category": "Côte d'Ivoire",
+    "photo": ""
+  },
+  {
+    "id": "ouassenan",
+    "short": "Myriam Ouassenan",
+    "full": "Myriam Ouassenan, Directeur d’exploitation du terminal",
+    "category": "Côte d'Ivoire",
+    "photo": ""
+  },
+  {
+    "id": "van-eyll",
+    "short": "Carole van Eyll",
+    "full": "Carole van Eyll, Ambassadrice du Royaume de Belgique à Abidjan",
+    "category": "Belgique",
     "photo": ""
   }
 ]
