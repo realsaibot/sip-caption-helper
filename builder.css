@@ -58,6 +58,17 @@ body{
 .panelTitle{ font-weight:900; }
 .panelMeta{ color:var(--muted); font-size:13px; }
 
+.syncRow{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.syncStatus{ color:var(--muted); font-size:12px; min-width:0; }
+.syncStatus.warn{ color:#ffb454; }
+.syncBtn{ flex-shrink:0; font-size:12px; }
+
 .searchRow{
   display:flex;
   gap:8px;

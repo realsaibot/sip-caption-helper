@@ -30,6 +30,9 @@ const els = {
   toast:         document.getElementById("toast"),
   recognizeBtn:  document.getElementById("recognizeBtn"),
   recognizeFile: document.getElementById("recognizeFile"),
+  syncRow:       document.getElementById("syncRow"),
+  syncStatus:    document.getElementById("syncStatus"),
+  syncBtn:       document.getElementById("syncBtn"),
 };
 
 let people       = [];
@@ -152,36 +155,83 @@ async function loadData() {
 
   // If GitHub can read (public URL — works even on fresh install with no token),
   // refresh data in background then re-render
-  if (GithubSync.canRead()) {
-    GithubSync.load()
-      .then(async remote => {
-        if (!remote) return;
+  syncFromGithub();
+}
 
-        // If local data hasn't synced to GitHub yet, don't overwrite it.
-        // Also skip if a save just succeeded — raw CDN can lag 30-120s behind the API.
-        const _recentSave = parseInt(localStorage.getItem('gh_saved_at') || '0');
-        const _cdnGrace = (Date.now() - _recentSave) < 90_000;
-        if (localStorage.getItem('gh_pending_save') === '1' || _cdnGrace) {
-          console.info('Skipping GitHub overwrite — local changes or CDN grace period.');
-          return;
-        }
+// ── GitHub sync ───────────────────────────────────────────────────────────────
 
-        const photoMap = {};
-        const cleanedRemote = remote.map(x => {
-          if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
-          return normalizePerson(x);
-        }).filter(p => p.short && p.full);
+let syncInFlight = null;
+let lastSyncAt   = 0;
 
-        if (Object.keys(photoMap).length) await PhotoDB.setMany(photoMap);
+function setSyncStatus(text, warn = false) {
+  els.syncRow.classList.remove("hidden");
+  els.syncStatus.textContent = text;
+  els.syncStatus.classList.toggle("warn", warn);
+}
 
-        people = cleanedRemote;
-        await storage.set({ people });
-        photoCache = await PhotoDB.getMany(people.map(p => p.id));
+function syncFromGithub() {
+  if (!GithubSync.canRead()) return Promise.resolve();
+  if (syncInFlight) return syncInFlight;
 
-        renderPeople();
-      })
-      .catch(e => console.warn("GitHub fetch failed on builder load:", e));
-  }
+  lastSyncAt = Date.now();
+  els.syncBtn.disabled = true;
+  setSyncStatus("Synchronisation…");
+
+  syncInFlight = (async () => {
+    const remote = await GithubSync.load();
+    if (!remote) {
+      setSyncStatus("GitHub injoignable — liste locale affichée", true);
+      return;
+    }
+
+    // If local data hasn't synced to GitHub yet, don't overwrite it.
+    // Also skip if a save just succeeded — raw CDN can lag 30-120s behind the API.
+    const _recentSave = parseInt(localStorage.getItem('gh_saved_at') || '0');
+    const _cdnGrace = (Date.now() - _recentSave) < 90_000;
+    if (localStorage.getItem('gh_pending_save') === '1') {
+      console.info('Skipping GitHub overwrite — local changes pending.');
+      setSyncStatus("Modifications locales non enregistrées — ouvrez Options pour les enregistrer", true);
+      return;
+    }
+    if (_cdnGrace) {
+      console.info('Skipping GitHub overwrite — CDN grace period.');
+      setSyncStatus("Enregistré à l'instant — réessayez dans une minute");
+      return;
+    }
+
+    const photoMap = {};
+    const cleanedRemote = remote.map(x => {
+      if (x.photo) photoMap[x.id || slugify(x.short || "")] = x.photo;
+      return normalizePerson(x);
+    }).filter(p => p.short && p.full);
+
+    if (Object.keys(photoMap).length) await PhotoDB.setMany(photoMap);
+
+    people = cleanedRemote;
+    await storage.set({ people });
+    photoCache = await PhotoDB.getMany(people.map(p => p.id));
+
+    // Selected entries are copies — refresh them so the caption uses current titles
+    const byId = new Map(people.map(p => [p.id, p]));
+    selection = selection.map(s => byId.has(s.id) ? { ...byId.get(s.id) } : s);
+    persistSelection();
+
+    const time = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    setSyncStatus(`Synchronisé à ${time} · ${people.length} personnes`);
+
+    renderPeople();
+    renderSelection();
+  })()
+    .catch(e => {
+      console.warn("GitHub fetch failed on builder load:", e);
+      setSyncStatus("GitHub injoignable — liste locale affichée", true);
+    })
+    .finally(() => {
+      syncInFlight = null;
+      els.syncBtn.disabled = false;
+    });
+
+  return syncInFlight;
 }
 
 function persistPrefix()    { storage.set({ prefixEnabled }); }
@@ -651,6 +701,13 @@ els.copyBtn.addEventListener("click", copyCaption);
 els.clearBtn.addEventListener("click", () => { selection = []; persistSelection(); renderSelection(); });
 els.prefixToggle.addEventListener("change", () => { prefixEnabled = els.prefixToggle.checked; persistPrefix(); });
 els.openOptions.addEventListener("click", () => { window.location.href = "options.html"; });
+els.syncBtn.addEventListener("click", () => syncFromGithub());
+
+// Phones often resume the app without reloading the page, so re-check GitHub
+// whenever it comes back to the foreground (at most every 30s).
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && Date.now() - lastSyncAt > 30_000) syncFromGithub();
+});
 
 // ── Recognition trigger ───────────────────────────────────────────────────────
 
