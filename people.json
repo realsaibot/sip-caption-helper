@@ -296,7 +296,7 @@
   {
     "id": "konjufca",
     "short": "Glauk Konjufca",
-    "full": "Glauk Konjufca, Premier Vice-Premier ministre et ministre des Affaires étrangères et de la Diaspora du Kosovo",
+    "full": "Glauk Konjufca, Vice-Premier ministre et Ministre des Affaires étrangères et de la Diaspora de la République du Kosovo",
     "category": "Kosovo",
     "photo": ""
   },
@@ -1285,6 +1285,48 @@
     "short": "Abdullah bin Zayed Al Nahyan",
     "full": "Cheikh Abdullah bin Zayed Al Nahyan, Vice-Premier ministre, ministre des Affaires étrangères des Émirats arabes unis",
     "category": "Émirats arabes unis",
+    "photo": ""
+  },
+  {
+    "id": "prak-sokhonn",
+    "short": "Prak Sokhonn",
+    "full": "Prak Sokhonn, Vice-Premier ministre et ministre des Affaires étrangères du Cambodge",
+    "category": "Cambodge",
+    "photo": ""
+  },
+  {
+    "id": "hun-manet",
+    "short": "Hun Manet",
+    "full": "Hun Manet, Premier ministre du Cambodge",
+    "category": "Cambodge",
+    "photo": ""
+  },
+  {
+    "id": "sihamoni",
+    "short": "Norodom Sihamoni",
+    "full": "S.M. Norodom Sihamoni, Roi du Cambodge",
+    "category": "Cambodge",
+    "photo": ""
+  },
+  {
+    "id": "macron",
+    "short": "Emmanuel Macron",
+    "full": "Emmanuel Macron, Président de la République française",
+    "category": "France",
+    "photo": ""
+  },
+  {
+    "id": "plamondon",
+    "short": "Paul St-Pierre Plamondon",
+    "full": "Paul St-Pierre Plamondon, Premier ministre du Québec",
+    "category": "Québec",
+    "photo": ""
+  },
+  {
+    "id": "carney",
+    "short": "Mark Carney",
+    "full": "Mark Carney, Premier ministre du Canada",
+    "category": "Canada",
     "photo": ""
   }
 ]
