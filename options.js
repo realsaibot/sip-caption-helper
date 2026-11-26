@@ -132,12 +132,15 @@ function refreshAddAvatar() {
   }
 }
 
+function nowStamp() { return new Date().toISOString().replace(/\.\d+Z$/, "Z"); }
+
 function normalizePerson(x) {
   const short    = String(x.short    || "").trim();
   const full     = String(x.full     || "").trim();
   const category = String(x.category || "").trim();
   const id       = String(x.id       || "").trim() || slugify(short);
-  return { id, short, full, category };
+  const added    = String(x.added    || "").trim();
+  return { id, short, full, category, added };
 }
 
 // ── Load / Save ───────────────────────────────────────────────────────────────
@@ -391,7 +394,7 @@ function renderEditRow(i, currentPhoto) {
     if (editPhoto) await PhotoDB.set(p.id, editPhoto);
     else           await PhotoDB.remove(p.id);
 
-    people[i] = normalizePerson({ id: p.id, short: newShort, category: newCategory, full: newFull });
+    people[i] = normalizePerson({ id: p.id, short: newShort, category: newCategory, full: newFull, added: p.added });
     await saveAll();
     await render();
     setStatus("Saved ✅", "ok");
@@ -438,7 +441,7 @@ els.add.onclick = async () => {
   const full     = els.full.value.trim();
   if (!short || !full) { setStatus("Short and Full are required.", "warn"); return; }
 
-  const person = normalizePerson({ short, category, full });
+  const person = normalizePerson({ short, category, full, added: nowStamp() });
   const photoBase64 = pendingPhoto || "";
   if (photoBase64) await PhotoDB.set(person.id, photoBase64);
   people.unshift(person);
@@ -504,8 +507,8 @@ els.importFile.onchange = async () => {
     let added = 0, updated = 0;
     cleaned.forEach(entry => {
       const idx = people.findIndex(p => p.id === entry.id);
-      if (idx >= 0) { people[idx] = entry; updated++; }
-      else          { people.push(entry); added++; }
+      if (idx >= 0) { people[idx] = { ...entry, added: entry.added || people[idx].added }; updated++; }
+      else          { people.push({ ...entry, added: entry.added || nowStamp() }); added++; }
     });
 
     await saveAll();
