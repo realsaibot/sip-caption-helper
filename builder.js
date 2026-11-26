@@ -217,7 +217,11 @@ function syncFromGithub() {
     persistSelection();
 
     const time = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-    setSyncStatus(`Synchronisé à ${time} · ${people.length} personnes`);
+    if (GithubSync.lastLoadSource() === 'cdn') {
+      setSyncStatus(`Synchronisé à ${time} · ${people.length} personnes (copie en cache, jusqu'à 5 min de retard)`, true);
+    } else {
+      setSyncStatus(`Synchronisé à ${time} · ${people.length} personnes`);
+    }
 
     renderPeople();
     renderSelection();
