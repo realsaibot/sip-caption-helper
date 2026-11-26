@@ -23,6 +23,7 @@ const GithubSync = (() => {
   };
 
   const FILE = 'people.json';
+  let lastSource = null;
 
   // ── Auto-derive owner/repo from GitHub Pages URL ─────────────────────────
 
@@ -142,17 +143,43 @@ const GithubSync = (() => {
   async function load() {
     if (!canRead()) return null;
     const { owner, repo, branch } = getReadConfig();
+
+    // The Contents API serves the latest commit immediately. raw.githubusercontent.com
+    // ignores query strings, so it can keep serving a copy up to 5 min old after a change.
+    try {
+      const { token } = getConfig();
+      const headers = { 'Accept': 'application/vnd.github.raw+json', 'X-GitHub-Api-Version': '2022-11-28' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${FILE}?ref=${branch}`,
+        { headers, cache: 'no-cache' } // revalidate with ETag; 304s don't count against the rate limit
+      );
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      lastSource = 'api';
+      return data;
+    } catch (e) {
+      console.warn('GithubSync.load via API failed, falling back to raw CDN:', e);
+    }
+
+    // Fallback (e.g. API rate limit of 60 req/h per IP without a token)
     const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${FILE}?_=${Date.now()}`;
     try {
       const res = await fetch(url);
       if (res.status === 404) return null;
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
+      const data = await res.json();
+      lastSource = 'cdn';
+      return data;
     } catch (e) {
       console.warn('GithubSync.load failed:', e);
       return null;
     }
   }
+
+  /** 'api' (up to date) or 'cdn' (may lag up to 5 min) — where the last successful load() came from */
+  function lastLoadSource() { return lastSource; }
 
   /**
    * Save people.json to GitHub.
@@ -205,5 +232,5 @@ const GithubSync = (() => {
     }
   }
 
-  return { canRead, canWrite, isConfigured, getConfig, getReadConfig, setConfig, clearConfig, testConnection, load, save };
+  return { canRead, canWrite, isConfigured, getConfig, getReadConfig, setConfig, clearConfig, testConnection, load, lastLoadSource, save };
 })();
