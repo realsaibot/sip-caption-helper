@@ -33,6 +33,9 @@ const els = {
   syncRow:       document.getElementById("syncRow"),
   syncStatus:    document.getElementById("syncStatus"),
   syncBtn:       document.getElementById("syncBtn"),
+  selBar:        document.getElementById("selBar"),
+  selBarText:    document.getElementById("selBarText"),
+  selBarCopy:    document.getElementById("selBarCopy"),
 };
 
 let people       = [];
@@ -115,7 +118,14 @@ function escapeHtml(s) {
     .replaceAll("'","&#039;");
 }
 
-function normalize(s) { return String(s || "").toLowerCase().trim(); }
+// Accent-, case- and punctuation-insensitive form for search ("Prevot" finds "Prévot", "st pierre" finds "St-Pierre")
+const FOLD = { "ø":"o", "ł":"l", "đ":"d", "ð":"d", "þ":"th", "æ":"ae", "œ":"oe", "ß":"ss", "ı":"i" };
+function normalize(s) {
+  return String(s || "").toLowerCase()
+    .normalize("NFD").replace(/\p{M}/gu, "")
+    .replace(/[øłđðþæœßı]/g, c => FOLD[c])
+    .replace(/[^a-z0-9]+/g, " ").trim();
+}
 
 function showToast(msg) {
   els.toast.textContent = msg;
@@ -133,7 +143,8 @@ function normalizePerson(x) {
   const full     = String(x.full     || "").trim();
   const category = String(x.category || "").trim();
   const id       = String(x.id       || "").trim() || slugify(short);
-  return { id, short, full, category };
+  const added    = String(x.added    || "").trim();
+  return { id, short, full, category, added };
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -242,17 +253,32 @@ function persistPrefix()    { storage.set({ prefixEnabled }); }
 function persistSelection() { storage.set({ selectionDraft: selection }); }
 
 function matchesPerson(p, query) {
-  if (!query) return true;
-  const q   = normalize(query);
+  const words = normalize(query).split(" ").filter(Boolean);
+  if (!words.length) return true;
   const hay = normalize(`${p.short} ${p.full} ${p.category || ""} ${p.id || ""}`);
-  return hay.includes(q);
+  return words.every(w => hay.includes(w));
+}
+
+const NEW_DAYS = 7;
+function isNew(p) {
+  const t = Date.parse(p.added || "");
+  return !isNaN(t) && Date.now() - t < NEW_DAYS * 86_400_000;
+}
+
+// Newest first; people without a date keep their file order at the end
+function byNewest(a, b) {
+  return (b.p.added || "").localeCompare(a.p.added || "") || a.i - b.i;
 }
 
 // ── Render people list ────────────────────────────────────────────────────────
 
 function renderPeople() {
   const q        = els.search.value;
-  const filtered = people.filter(p => matchesPerson(p, q));
+  const filtered = people
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => matchesPerson(p, q))
+    .sort(byNewest)
+    .map(({ p }) => p);
 
   els.count.textContent = `${filtered.length}`;
   els.peopleList.innerHTML = "";
@@ -266,8 +292,9 @@ function renderPeople() {
     const textWrap = document.createElement("div");
     textWrap.style.cssText = "min-width:0;flex:1;";
     const cat = p.category ? `<span class="personCat">${escapeHtml(p.category)}</span>` : "";
+    const badge = isNew(p) ? `<span class="newBadge">Nouveau</span>` : "";
     textWrap.innerHTML = `
-      <div class="personName">${escapeHtml(p.short)}${cat}</div>
+      <div class="personName">${escapeHtml(p.short)}${cat}${badge}</div>
       <div class="personFull">${escapeHtml(p.full)}</div>
     `;
 
@@ -341,6 +368,10 @@ function renderSelection() {
   const has = selection.length > 0;
   els.copyBtn.disabled  = !has;
   els.clearBtn.disabled = !has;
+
+  // Compact selection summary pinned to the top on phones (the full panel sits below the list)
+  els.selBar.classList.toggle("hidden", !has);
+  els.selBarText.textContent = `Sélection (${selection.length}) : ${selection.map(p => p.short).join(" · ")}`;
 }
 
 // ── Caption ───────────────────────────────────────────────────────────────────
@@ -706,6 +737,8 @@ els.clearBtn.addEventListener("click", () => { selection = []; persistSelection(
 els.prefixToggle.addEventListener("change", () => { prefixEnabled = els.prefixToggle.checked; persistPrefix(); });
 els.openOptions.addEventListener("click", () => { window.location.href = "options.html"; });
 els.syncBtn.addEventListener("click", () => syncFromGithub());
+els.selBarCopy.addEventListener("click", copyCaption);
+els.selBarText.addEventListener("click", () => els.selection.scrollIntoView({ behavior: "smooth", block: "center" }));
 
 // Phones often resume the app without reloading the page, so re-check GitHub
 // whenever it comes back to the foreground (at most every 30s).
